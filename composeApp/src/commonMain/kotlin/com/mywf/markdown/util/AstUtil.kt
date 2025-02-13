@@ -81,6 +81,37 @@ fun ASTNode.isTable(markdownText: String): Boolean {
     return step == 3
 }
 
+
+// 分割函数
+fun splitByImage(nodes: List<ASTNode>): List<List<ASTNode>> {
+    val result = mutableListOf<MutableList<ASTNode>>()
+    var currentList = mutableListOf<ASTNode>()
+
+    for (node in nodes) {
+        if (node.type == MarkdownElementTypes.IMAGE) {
+            // 如果当前列表不为空，将其添加到结果中
+            if (currentList.isNotEmpty()) {
+                result.add(currentList)
+            }
+            // 开始一个新的子列表，并包含当前的 Image 节点
+            currentList = mutableListOf(node)
+            result.add(currentList)
+            currentList = mutableListOf() // 重置当前列表
+        } else {
+            // 将非 Image 节点添加到当前列表
+            currentList.add(node)
+        }
+    }
+
+    // 添加最后一个子列表（如果有内容）
+    if (currentList.isNotEmpty()) {
+        result.add(currentList)
+    }
+
+    return result
+}
+
+
 fun List<ASTNode>.getTableHeaders(markdownText: String): List<AnnotatedString> {
     val result = mutableListOf<AnnotatedString>()
     val separator = "|"

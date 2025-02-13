@@ -1,5 +1,6 @@
 package com.mywf
 
+import androidx.compose.runtime.Composable
 import platform.UIKit.UIDevice
 
 class IOSPlatform: Platform {
@@ -7,3 +8,10 @@ class IOSPlatform: Platform {
 }
 
 actual fun getPlatform(): Platform = IOSPlatform()
+actual val supportVerticalBar: Boolean
+    get() = TODO("Not yet implemented")
+
+
+actual fun VerticalScrollbar(): () -> Unit {
+    TODO("Not yet implemented")
+}

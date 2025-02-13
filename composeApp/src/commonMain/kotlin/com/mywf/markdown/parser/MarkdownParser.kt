@@ -1,20 +1,15 @@
 package com.mywf.markdown.parser
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Icon
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,13 +26,16 @@ import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.SubcomposeAsyncImage
+import com.mywf.VerticalScrollbar
 import com.mywf.markdown.renderer.Table
-import com.mywf.model.markdown.constant.MarkdownElementTypeNames
+import com.mywf.markdown.constant.MarkdownElementTypeNames
 import com.mywf.model.markdown.exception.MarkdownParseTableException
 import com.mywf.markdown.util.findChildByName
 import com.mywf.markdown.util.getTableItemNumber
 import com.mywf.markdown.util.hasImage
 import com.mywf.markdown.util.isTable
+import com.mywf.markdown.util.splitByImage
 import com.mywf.markdown.util.splitList
 import com.mywf.markdown.util.styleByATX
 import org.intellij.markdown.MarkdownElementTypes
@@ -72,12 +70,18 @@ class MarkdownParser(private val markdownContent: String) {
     fun parse(): @Composable () -> Unit {
         printAstTree(parsedTree, markdownContent)
         return {
-            LazyColumn(
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.8f),
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.TopCenter
             ) {
-                parsedTree.children.forEach { node ->
-                    item {
+                val state = rememberScrollState()
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .verticalScroll(state),
+                ) {
+                    parsedTree.children.forEach { node ->
                         if (node.type == MarkdownElementTypes.PARAGRAPH) {
                             parsePARAGRAPH(node).invoke()
                         } else if (
@@ -89,27 +93,60 @@ class MarkdownParser(private val markdownContent: String) {
                         ) {
                             parseATX(node).invoke()
                         } else if (node.type.name == MarkdownElementTypeNames.EOL) {
-//                            parseEOL(node).invoke()
+                            parseEOL(node).invoke()
+                        } else if (node.type == MarkdownElementTypes.UNORDERED_LIST) {
+                            parseUNORDEREDLIST(node).invoke()
                         } else {
                             parseElse(node).invoke()
                         }
                     }
                 }
+                VerticalScrollbar(
+                    state = state,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                ).invoke()
             }
         }
-
     }
 
 //    fun parseText(nodes: List<ASTNode>): @Composable () -> Unit {
 //
 //    }
 
-    @OptIn(ExperimentalLayoutApi::class)
     fun parsePARAGRAPH(node: ASTNode): @Composable () -> Unit = {
         if (node.isTable(markdownContent)) {
             Table(parseTable(node))
         } else if (node.hasImage()) {
-            Text("this is a Image")
+            val nodeList = splitByImage(node.children)
+            nodeList.forEach { nodes ->
+                if (nodes.size == 1 && nodes.first().type == MarkdownElementTypes.IMAGE) {
+                    val imgNode = nodes.first()
+                    val imageState = parseImage(imgNode)
+                    val baseUrl =
+                        "https://resources.jetbrains.com/help/img/kotlin-multiplatform-dev/"
+//                    println("$baseUrl${imageState.linkDestination}")
+                    SubcomposeAsyncImage(
+                        model = "$baseUrl${imageState.linkDestination}",
+                        contentDescription = imageState.linkText,
+                        modifier = Modifier
+                            .padding(bottom = 24.dp),
+                        error = {
+                            Text(
+                                text = imageState.linkText,
+                                color = Color.Red,
+                                modifier = Modifier
+                                    .padding(bottom = 24.dp)
+                            )
+                        }
+                    )
+                } else {
+                    val annotatedString = parseText(nodes)
+                    Text(
+                        annotatedString,
+                    )
+                }
+            }
         } else {
             Text(
                 parseText(node)
@@ -121,7 +158,7 @@ class MarkdownParser(private val markdownContent: String) {
         return {
             val annotatedString = buildAnnotatedString {
                 node.findChildByName("ATX_CONTENT")!!.children.forEach {
-                    if (it.type.name == MarkdownElementTypeNames.TEXT) {
+                    if (it.type.name != "WHITE_SPACE") {
                         append(it.getTextInNode(markdownContent))
                     }
                 }
@@ -147,20 +184,22 @@ class MarkdownParser(private val markdownContent: String) {
         }
     }
 
+    fun parseUNORDEREDLIST(node: ASTNode): @Composable () -> Unit = {
+        val list = parseUnorderedList(node)
+        Column {
+            list.forEach {
+                Text(it)
+            }
+        }
+
+    }
+
     fun parseElse(node: ASTNode): @Composable () -> Unit {
         return {
             Text(node.type.toString())
         }
     }
 
-//    else if (node.type == MarkdownElementTypes.SHORT_REFERENCE_LINK) {
-//        Text(
-//            text = node.findChildOfType(MarkdownElementTypes.LINK_LABEL)!!
-//                .findChildByName(MarkdownElementTypeNames.TEXT)!!.toString(),
-//            fontSize = 20.sp,
-//            fontWeight = FontWeight.Bold
-//        )
-//    }
 
     fun parseTable(node: ASTNode): MarkdownTableState {
         val tableList = splitList(node.children) { it.type.name == MarkdownElementTypeNames.EOL }
@@ -297,22 +336,23 @@ class MarkdownParser(private val markdownContent: String) {
 
                     else -> {
                         val content = parNode.getTextInNode(markdownContent)
-                        if (parNode.type.name == MarkdownElementTypeNames.EOL &&
+                        if ((i == 0 || i == 1) && (parNode.type.name == "EOL" || parNode.type.name == "WHITE_SPACE")) {
+//                            continue
+                        } else if (parNode.type.name == MarkdownElementTypeNames.EOL &&
                             i + 1 < nodes.size &&
                             nodes[i + 1].type.name == MarkdownElementTypeNames.EOL
                         ) {
                             append("\n\n")
-                            i++
-                        } else if (parNode.type.name == MarkdownElementTypeNames.EOL &&
-                            (i == 0 || i == 1)
-                        ) {
-                            append("\n")
                         } else {
-                            append(
-                                content.replace(Regex("\\R"), " ")
-                            )
+                            append(content.replace(Regex("\\R"), ""))
                         }
-
+//                        else if (parNode.type.name == MarkdownElementTypeNames.WHITE_SPACE &&
+//                            content.first() == '\r' &&
+//                            i + 1 < nodes.size &&
+//                            nodes[i + 1].type.name == MarkdownElementTypeNames.EOL
+//                        ) {
+////                            continue
+//                        }
                     }
                 }
                 i++
@@ -321,6 +361,7 @@ class MarkdownParser(private val markdownContent: String) {
         return annotatedString
     }
 
+    @Deprecated("not use yet")
     fun parseInlineLink(parNode: ASTNode): @Composable () -> Unit = {
         val annotatedString = buildAnnotatedString {
             val linkText =
@@ -381,16 +422,17 @@ class MarkdownParser(private val markdownContent: String) {
             itemNode.children.forEach { node ->
                 when (node.type) {
                     MarkdownElementTypes.PARAGRAPH -> {
-
-                        append(buildAnnotatedString {
-                            withStyle(
-                                style = ParagraphStyle(
-                                    textIndent = TextIndent(firstLine = 0.sp, restLine = 20.sp)
-                                )
-                            ) {
-                                append(AnnotatedString("\u2022  ${parseText(node)}"))
+                        append(
+                            buildAnnotatedString {
+                                withStyle(
+                                    style = ParagraphStyle(
+                                        textIndent = TextIndent(firstLine = 0.sp, restLine = 20.sp)
+                                    )
+                                ) {
+                                    append(AnnotatedString("\u2022  ${parseText(node)}"))
+                                }
                             }
-                        })
+                        )
                     }
 
                     MarkdownElementTypes.UNORDERED_LIST -> {
@@ -410,7 +452,7 @@ class MarkdownParser(private val markdownContent: String) {
         }
     }
 
-    fun parseUnorderedList(node: ASTNode): List<AnnotatedString> {
+    private fun parseUnorderedList(node: ASTNode): List<AnnotatedString> {
         val result = mutableListOf<AnnotatedString>()
         node.children.forEach { itemNode ->
             if (itemNode.type == MarkdownElementTypes.LIST_ITEM) {

@@ -1,8 +1,11 @@
 package com.mywf
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Typography
@@ -46,17 +49,26 @@ fun main() = application {
                 val file = "faq"
                 val markdown = Res.readBytes("files/$file.md").decodeToString()
 //                    .lines().filter { it.isNotBlank() }.joinToString("\n")
-                println(markdown)
+//                println(markdown)
                 markdownContent = markdown
             }
             if (markdownContent.isNotEmpty()) {
                 val parser = remember { MarkdownParser(markdownContent) }
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Box(
+                    contentAlignment = Alignment.TopCenter
                 ) {
-                    parser.parse().invoke()
+                    SelectionContainer {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            parser.parse().invoke()
+                        }
+                    }
+//                    androidx.compose.foundation.VerticalScrollbar(
+//                        adapter = rememberScrollbarAdapter()
+//                    )
                 }
             }
         }
