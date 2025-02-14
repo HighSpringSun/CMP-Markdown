@@ -282,10 +282,7 @@ class MarkdownParser(private val markdownContent: String) {
                 when (parNode.type) {
                     MarkdownElementTypes.STRONG -> {
                         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(
-                                parNode.findChildByName(MarkdownElementTypeNames.TEXT)!!
-                                    .getTextInNode(markdownContent)
-                            )
+                            append(parseSTRONG(parNode))
                         }
                     }
 
@@ -306,11 +303,9 @@ class MarkdownParser(private val markdownContent: String) {
                                 linkDestination,
                                 styles = TextLinkStyles(
                                     style = SpanStyle(
-//                                        fontWeight = FontWeight.Bold,
                                         color = Color(48, 127, 255)
                                     ),
                                     hoveredStyle = SpanStyle(
-//                                        fontWeight = FontWeight.Bold,
                                         color = Color(48, 127, 255),
                                         textDecoration = TextDecoration.Underline
                                     )
@@ -454,16 +449,30 @@ class MarkdownParser(private val markdownContent: String) {
 
     private fun parseUnorderedList(node: ASTNode): List<AnnotatedString> {
         val result = mutableListOf<AnnotatedString>()
+        println(node.children.map { it.type }.toList())
         node.children.forEach { itemNode ->
             if (itemNode.type == MarkdownElementTypes.LIST_ITEM) {
                 result.add(parseListItem(itemNode))
             } else if (itemNode.type.name == MarkdownElementTypeNames.EOL) {
+                result.add(AnnotatedString(""))
 //                    append(itemNode.getTextInNode(markdownContent))
             } else {
 //                    append(itemNode.getTextInNode(markdownContent))
+//                println("unorderedList :${itemNode.type}")
             }
         }
         return result
+    }
+
+    private fun parseSTRONG(node: ASTNode): AnnotatedString = buildAnnotatedString {
+        require(node.type == MarkdownElementTypes.STRONG)
+//        println(node.children.map { it.type }.toList())
+        node.children.forEach { childNode ->
+            // todo  一个非常奇怪的问题，不能使用type比较因为一直不等于
+            if (childNode.type.name != MarkdownElementTypes.EMPH.name) {
+                append(childNode.getTextInNode(markdownContent))
+            }
+        }
     }
 
     private fun printAstTree(node: ASTNode, markdownText: String, indent: String = "") {

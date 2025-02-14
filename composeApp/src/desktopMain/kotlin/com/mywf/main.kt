@@ -45,10 +45,10 @@ fun main() = application {
         ) {
             var markdownContent by remember { mutableStateOf("") }
             LaunchedEffect(Unit) {
-//                val file = "supported-platforms"
-                val file = "faq"
-                val markdown = Res.readBytes("files/$file.md").decodeToString()
-//                    .lines().filter { it.isNotBlank() }.joinToString("\n")
+                val file = "supported-platforms-zh-cn" //-zh-cn
+//                val file = "faq"
+                val markdown =
+                    Res.readBytes("files/$file.md").decodeToString().replace("\r\n", "\n")
 //                println(markdown)
                 markdownContent = markdown
             }

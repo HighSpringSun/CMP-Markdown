@@ -1,82 +1,77 @@
-[//]: # (title: 支撑平台的稳定性)
+[//]: # (标题: 受支持平台的稳定性)
 
-Kotlin Multiplatform(以下简称为KMP)允许你为各种平台创建应用程序并且在它们之间分享代码，以便能够覆盖用户喜欢的设备。
-不同的平台可能具有不同的稳定性等级，这取决于KMP的核心代码对代码共享的支持程度，以及Compose Multiplatform(以下简称CMP) UI框架的支持程度。
+Kotlin 多平台技术允许你为各种平台创建应用程序，并在这些平台之间共享代码，这样你就可以覆盖使用他们喜爱设备的用户。不同平台的稳定性可能会有所不同，这取决于核心 Kotlin 多平台技术对代码共享的支持程度以及 Compose 多平台 UI 框架的支持程度。
 
-本页包含的信息将帮助您确定哪些平台符合您的项目需求，并提供有关其稳定性等级的详细信息。
+本页面包含的信息可以帮助你确定哪些平台符合你的项目需求，以及它们的稳定性级别详情。
 
-## KMP 核心技术稳定性等级
+## 核心 Kotlin 多平台技术的稳定性级别
 
-以下是 Kotlin 多平台核心技术平台稳定性级别的简要指南及其含义：
+以下是核心 Kotlin 多平台技术的平台稳定性级别及其含义的快速指南：
 
-**实验性** 意味着“仅供试用”:
+**实验性** 意味着 “仅供试用”：
 
-* 我们只是在尝试一个想法，并希望一些用户试用并提供反馈。如果效果不佳，我们可能会随时放弃。
+* 我们只是在尝试一个想法，希望一些用户能够使用它并提供反馈。如果效果不理想，我们可能会随时放弃它。
 
-**尽最大努力** 意味着“在大多数情况下使用是安全的”:
+**尽力维护** 意味着 “在大多数场景下可以安全使用”：
 
-* 可能会有意外的破坏性更改。
-* 在迁移过程中可能会遇到问题。
+* 可能会有意外的重大变更。
+* 你在迁移过程中可能会遇到问题。
 
-**稳定** 意味着“即使在最保守的场景中也可以使用”:
+**稳定** 意味着 “即使在最保守的场景下你也可以使用它”：
 
-* 它已经完成。我们将根据严格的[向后兼容性规则](https://kotlinfoundation.org/language-committee-guidelines/)进行开发。
+* 它已经完成了。我们将根据我们严格的[向后兼容性规则](https://kotlinfoundation.org/language-committee-guidelines/)来进行开发。
 
-### 当前KMP核心技术各个平台稳定性级别
+### Kotlin Multiplatform 核心技术当前各平台稳定性级别
 
-| Platform                 | Stability level |
-|--------------------------|-----------------|
-| Android                  | Stable          |
-| iOS                      | Stable          |
-| Desktop (JVM)            | Stable          |
-| Server-side (JVM)        | Stable          |
-| Web based on Kotlin/Wasm | Alpha           |
-| Web based on Kotlin/JS   | Stable          |
-| watchOS                  | Best effort     |
-| tvOS                     | Best effort     |
+| 平台                   | 稳定性级别         |
+|----------------------|---------------|
+| Android              | 稳定            |
+| iOS                  | 稳定            |
+| 桌面 (JVM)             | 稳定            |
+| 服务器端 (JVM)           | 稳定            |
+| 基于 Kotlin/Wasm 的 Web | Alpha(内部测试阶段) |
+| 基于 Kotlin/JS 的 Web   | 稳定            |
+| watchOS              | 尽力维护          |
+| tvOS                 | 尽力维护          |
 
-Kotlin Multiplatform supports more native platforms than are listed here. To understand the level of support for each of
-them, see [Kotlin/Native target support](https://kotlinlang.org/docs/native-target-support.html).
+Kotlin 多平台技术支持的原生平台不止上述列出的这些。要了解每个平台的支持级别，请参阅 [Kotlin/原生目标支持](https://kotlinlang.org/docs/native-target-support.html)。
 
-For more information on the stability levels of Kotlin components like Kotlin Multiplatform,
-see [Stability levels of Kotlin components](https://kotlinlang.org/docs/components-stability.html#current-stability-of-kotlin-components).
+关于 Kotlin 组件（如 Kotlin 多平台技术）的稳定性级别的更多信息，请参阅 [Kotlin 组件的稳定性级别](https://kotlinlang.org/docs/components-stability.html#current-stability-of-kotlin-components)。
 
-## Compose Multiplatform UI framework stability levels
+## Compose 多平台 UI 框架的稳定性级别
 
-Here's a quick guide to platform stability levels for the Compose Multiplatform UI framework and their meaning:
+以下是 Compose 多平台 UI 框架的平台稳定性级别及其含义的快速指南：
 
-**Experimental** means "it's under development":
+**实验性** 意味着 “正在开发中”：
 
-* Some features might not be available yet and those features that are present might have performance issues or bugs.
-* There might be changes in the future, and breaking changes may occur frequently.
+* 某些功能可能还不可用，而现有的功能可能存在性能问题或漏洞。
+* 未来可能会有变化，并且可能会频繁出现重大变更。
 
-**Alpha** means "use at your own risk, expect migration issues":
+**Alpha(内部测试阶段)** 意味着 “使用风险自负，可能会有迁移问题”：
 
-* We have decided to productize platform support but it hasn't taken its final shape yet.
+* 我们已经决定将平台支持产品化，但它还没有最终定型。
 
-**Beta** means "you can use it, and we'll do our best to minimize migration issues for you":
+**测试版** 意味着 “你可以使用它，我们会尽力为你减少迁移问题”：
 
-* It's almost done, so user feedback is especially important now.
-* It's not 100% finished yet, so changes are possible (including ones based on your own feedback).
+* 它几乎完成了，所以现在用户的反馈尤为重要。
+* 它还没有 100% 完成，所以可能会有变化（包括根据你的反馈进行的更改）。
 
-We refer to **Experimental**, **Alpha**, and **Beta** collectively as **pre-stable** levels.
+我们将 **实验性**、**Alpha(内部测试阶段)** 和 **测试版** 统称为 **预稳定** 级别。
 
-**Stable** means "you can use it even in the most conservative of scenarios":
+**稳定** 意味着 “即使在最保守的场景下你也可以使用它”：
 
-* The framework provides a comprehensive API surface that allows you to write beautiful, production-ready applications,
-  without encountering performance or other issues in the framework itself.
-* API-breaking changes can only be made 2 versions after an official deprecation announcement.
+* 该框架提供了全面的 API 接口，允许你编写美观、可用于生产环境的应用程序，而不会遇到框架本身的性能或其他问题。
+* 只有在官方发布弃用公告后的两个版本后，才会进行破坏 API 的更改。
 
-### Current platform stability levels for Compose Multiplatform UI framework
+### Compose 多平台 UI 框架的当前平台稳定性级别
 
-| Platform                 | Stability level |
-|--------------------------|-----------------|
-| Android                  | Stable          |
-| iOS                      | Beta            |
-| Desktop (JVM)            | Stable          |
-| Web based on Kotlin/Wasm | Alpha           |
+| 平台                    | 稳定性级别         |
+|-----------------------|---------------|
+| Android               | 稳定            |
+| iOS                   | 测试版           |
+| 桌面 (JVM)              | 稳定            |
+| 基于 Kotlin/Wasm 的 Web  | Alpha(内部测试阶段) |
 
-## What's next?
+## 接下来做什么？
 
-See [Recommended IDEs](recommended-ides.md) to learn which IDE is better for your code-sharing scenario across different
-combinations of platforms.
+请参阅 [推荐的 IDE](recommended-ides.md)，了解在不同平台组合的代码共享场景中，哪个 IDE 更适合你。
