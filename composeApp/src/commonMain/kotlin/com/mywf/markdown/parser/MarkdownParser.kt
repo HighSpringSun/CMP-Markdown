@@ -119,23 +119,33 @@ class MarkdownParser(private val markdownContent: String) {
             Table(parseTable(node))
         } else if (node.hasImage()) {
             val nodeList = splitByImage(node.children)
-            nodeList.forEach { nodes ->
+            println(nodeList)
+            nodeList.forEachIndexed { index, nodes ->
                 if (nodes.size == 1 && nodes.first().type == MarkdownElementTypes.IMAGE) {
                     val imgNode = nodes.first()
                     val imageState = parseImage(imgNode)
                     val baseUrl =
                         "https://resources.jetbrains.com/help/img/kotlin-multiplatform-dev/"
 //                    println("$baseUrl${imageState.linkDestination}")
+                    val modifier = if (index + 1 < nodeList.size &&
+                        nodeList[index + 1].isNotEmpty() &&
+                        nodeList[index + 1].first().getTextInNode(markdownContent).startsWith('{')
+                    ) {
+                        Modifier
+//                            .fillMaxWidth(0.35f)
+                    } else {
+                        Modifier
+                    }
                     SubcomposeAsyncImage(
                         model = "$baseUrl${imageState.linkDestination}",
                         contentDescription = imageState.linkText,
-                        modifier = Modifier
+                        modifier = modifier
                             .padding(bottom = 24.dp),
                         error = {
                             Text(
                                 text = imageState.linkText,
                                 color = Color.Red,
-                                modifier = Modifier
+                                modifier = modifier
                                     .padding(bottom = 24.dp)
                             )
                         }
@@ -331,9 +341,7 @@ class MarkdownParser(private val markdownContent: String) {
 
                     else -> {
                         val content = parNode.getTextInNode(markdownContent)
-                        if ((i == 0 || i == 1) && (parNode.type.name == "EOL" || parNode.type.name == "WHITE_SPACE")) {
-//                            continue
-                        } else if (parNode.type.name == MarkdownElementTypeNames.EOL &&
+                        if (parNode.type.name == MarkdownElementTypeNames.EOL &&
                             i + 1 < nodes.size &&
                             nodes[i + 1].type.name == MarkdownElementTypeNames.EOL
                         ) {
@@ -341,6 +349,10 @@ class MarkdownParser(private val markdownContent: String) {
                         } else {
                             append(content.replace(Regex("\\R"), ""))
                         }
+//
+//                        if ((i == 0 || i == 1) && (parNode.type.name == "EOL" || parNode.type.name == "WHITE_SPACE")) {
+////                            continue
+//                        } else
 //                        else if (parNode.type.name == MarkdownElementTypeNames.WHITE_SPACE &&
 //                            content.first() == '\r' &&
 //                            i + 1 < nodes.size &&
@@ -424,7 +436,9 @@ class MarkdownParser(private val markdownContent: String) {
                                         textIndent = TextIndent(firstLine = 0.sp, restLine = 20.sp)
                                     )
                                 ) {
-                                    append(AnnotatedString("\u2022  ${parseText(node)}"))
+                                    append("\u2022  ")
+                                    append(parseText(node))
+//                                    append(AnnotatedString("\u2022  ${parseText(node)}"))
                                 }
                             }
                         )
@@ -449,16 +463,13 @@ class MarkdownParser(private val markdownContent: String) {
 
     private fun parseUnorderedList(node: ASTNode): List<AnnotatedString> {
         val result = mutableListOf<AnnotatedString>()
-        println(node.children.map { it.type }.toList())
         node.children.forEach { itemNode ->
             if (itemNode.type == MarkdownElementTypes.LIST_ITEM) {
                 result.add(parseListItem(itemNode))
             } else if (itemNode.type.name == MarkdownElementTypeNames.EOL) {
                 result.add(AnnotatedString(""))
-//                    append(itemNode.getTextInNode(markdownContent))
             } else {
-//                    append(itemNode.getTextInNode(markdownContent))
-//                println("unorderedList :${itemNode.type}")
+//              append(itemNode.getTextInNode(markdownContent))
             }
         }
         return result
@@ -466,9 +477,8 @@ class MarkdownParser(private val markdownContent: String) {
 
     private fun parseSTRONG(node: ASTNode): AnnotatedString = buildAnnotatedString {
         require(node.type == MarkdownElementTypes.STRONG)
-//        println(node.children.map { it.type }.toList())
         node.children.forEach { childNode ->
-            // todo  一个非常奇怪的问题，不能使用type比较因为一直不等于
+            // todo  一个非常奇怪的问题，不能使用type比较因为一直不相等，所以只能用name先比较
             if (childNode.type.name != MarkdownElementTypes.EMPH.name) {
                 append(childNode.getTextInNode(markdownContent))
             }

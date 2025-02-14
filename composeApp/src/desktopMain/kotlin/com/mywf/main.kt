@@ -45,8 +45,9 @@ fun main() = application {
         ) {
             var markdownContent by remember { mutableStateOf("") }
             LaunchedEffect(Unit) {
-                val file = "supported-platforms-zh-cn" //-zh-cn
+                val file = "supported-platforms" //-zh-cn
 //                val file = "faq"
+//                val file = "kotlin-multiplatform-roadmap"
                 val markdown =
                     Res.readBytes("files/$file.md").decodeToString().replace("\r\n", "\n")
 //                println(markdown)
