@@ -1,9 +1,15 @@
 package com.mywf.markdown.util
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 //import com.mywf.ui.page.documentspage.logger
 import org.intellij.markdown.MarkdownElementTypes
@@ -138,6 +144,49 @@ fun List<ASTNode>.getTableHeaders(markdownText: String): List<AnnotatedString> {
         i++
     }
     return result
+}
+
+
+fun parseStyleString(input: CharSequence): Pair<String, String>? {
+    val regex = Regex("""^\{\s*(\w+)\s*=\s*"([^"]*)"\s*\}$""")
+    return regex.matchEntire(input)?.destructured?.let { (key, value) ->
+        Pair(key, value)
+    }
+}
+
+
+fun ASTNode.checkNext(markdownContent: String): Modifier {
+    require(type == MarkdownElementTypes.PARAGRAPH) { type }
+    val pair = parseStyleString(getTextInNode(markdownContent))
+    println(pair)
+    return if (pair == null) {
+        Modifier
+    } else {
+        when (pair.first) {
+            "style" -> {
+                when (pair.second) {
+                    "note" -> {
+                        Modifier
+                            .background(Color(225, 241, 225), RoundedCornerShape(6.dp))
+                    }
+
+                    else -> {
+                        Modifier
+                    }
+                }
+
+            }
+
+            "width" -> {
+                Modifier
+                    .width(pair.second.toInt().dp)
+            }
+
+            else -> {
+                Modifier
+            }
+        }
+    }
 }
 
 

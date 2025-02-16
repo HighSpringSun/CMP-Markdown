@@ -17,14 +17,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastJoinToString
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import cmp_markdown.composeapp.generated.resources.MapleMono_NF_CN_Regular
 import cmp_markdown.composeapp.generated.resources.Res
 import com.mywf.markdown.parser.MarkdownParser
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.Font
 
 @OptIn(ExperimentalResourceApi::class)
 fun main() = application {
@@ -33,21 +36,27 @@ fun main() = application {
         title = "CMP-Markdown",
     ) {
 //        App()
+        val fontFamily = FontFamily(
+            Font(
+                resource = Res.font.MapleMono_NF_CN_Regular
+            )
+        )
         MaterialTheme(
-//            typography = Typography(
+            typography = Typography(
+                defaultFontFamily = fontFamily
 //                body1 = TextStyle().copy(
 //                    fontWeight = FontWeight.Normal,
 //                    fontSize = 18.sp,
 //                    lineHeight = 22.sp,
 //                    letterSpacing = 0.5.sp
 //                )
-//            )
+            )
         ) {
             var markdownContent by remember { mutableStateOf("") }
             LaunchedEffect(Unit) {
-                val file = "supported-platforms" //-zh-cn
-//                val file = "faq"
-//                val file = "kotlin-multiplatform-roadmap"
+//                val file = "supported-platforms-zh-cn" //-zh-cn
+//                val file = "faq-zh-cn"
+                val file = "kotlin-multiplatform-roadmap"
                 val markdown =
                     Res.readBytes("files/$file.md").decodeToString().replace("\r\n", "\n")
 //                println(markdown)

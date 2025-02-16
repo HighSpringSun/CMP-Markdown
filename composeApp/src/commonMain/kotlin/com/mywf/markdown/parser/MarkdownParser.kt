@@ -1,5 +1,7 @@
 package com.mywf.markdown.parser
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,8 +10,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +36,7 @@ import coil3.compose.SubcomposeAsyncImage
 import com.mywf.VerticalScrollbar
 import com.mywf.markdown.renderer.Table
 import com.mywf.markdown.constant.MarkdownElementTypeNames
+import com.mywf.markdown.util.checkNext
 import com.mywf.model.markdown.exception.MarkdownParseTableException
 import com.mywf.markdown.util.findChildByName
 import com.mywf.markdown.util.getTableItemNumber
@@ -96,6 +103,8 @@ class MarkdownParser(private val markdownContent: String) {
                             parseEOL(node).invoke()
                         } else if (node.type == MarkdownElementTypes.UNORDERED_LIST) {
                             parseUNORDEREDLIST(node).invoke()
+                        } else if (node.type == MarkdownElementTypes.BLOCK_QUOTE) {
+                            parseBLOCKQUOTE(node).invoke()
                         } else {
                             parseElse(node).invoke()
                         }
@@ -204,6 +213,42 @@ class MarkdownParser(private val markdownContent: String) {
 
     }
 
+    fun parseBLOCKQUOTE(node: ASTNode): @Composable () -> Unit = {
+        val list = parseBlockQuote(node)
+        val index = node.parent!!.children.indexOf(node) + 2
+        val modifier = if (index < parsedTree.children.size) {
+            val styleNode = parsedTree.children[index]
+            styleNode.checkNext(markdownContent)
+        } else {
+            Modifier
+        }
+        Row(
+            modifier = Modifier
+                .then(modifier)
+                .fillMaxWidth()
+                .padding(24.dp)
+        ) {
+            Icon(
+                Icons.Filled.Info,
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(end = 24.dp),
+                tint = Color(108, 185, 105)
+            )
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start
+            ) {
+                list.forEach { annotatedString ->
+                    Text(
+                        text = annotatedString,
+                        modifier = Modifier
+                    )
+                }
+            }
+        }
+    }
+
     fun parseElse(node: ASTNode): @Composable () -> Unit {
         return {
             Text(node.type.toString())
@@ -301,10 +346,14 @@ class MarkdownParser(private val markdownContent: String) {
                     }
 
                     MarkdownElementTypes.INLINE_LINK -> {
+//                        val linkText =
+//                            parNode.findChildOfType(MarkdownElementTypes.LINK_TEXT)!!
+//                                .findChildByName(MarkdownElementTypeNames.TEXT)!!
+//                                .getTextInNode(markdownContent)
                         val linkText =
                             parNode.findChildOfType(MarkdownElementTypes.LINK_TEXT)!!
-                                .findChildByName(MarkdownElementTypeNames.TEXT)!!
                                 .getTextInNode(markdownContent)
+                                .trim { it == '[' || it == ']' }
                         val linkDestination =
                             parNode.findChildOfType(MarkdownElementTypes.LINK_DESTINATION)!!
                                 .getTextInNode(markdownContent).toString()
