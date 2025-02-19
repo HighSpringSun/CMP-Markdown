@@ -23,8 +23,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastJoinToString
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import cmp_markdown.composeapp.generated.resources.MapleMono_NF_CN_Regular
-import cmp_markdown.composeapp.generated.resources.Res
+import com.kmpstudy.composeapp.generated.resources.MapleMono_NF_CN_Regular
+import com.kmpstudy.composeapp.generated.resources.Res
 import com.mywf.markdown.parser.MarkdownParser
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.Font

@@ -10,7 +10,7 @@ actual fun getPlatform(): Platform = WasmPlatform()
 actual val supportVerticalBar: Boolean
     get() = TODO("Not yet implemented")
 
-
-actual fun VerticalScrollbar(): () -> Unit {
-    TODO("Not yet implemented")
-}
+//
+//actual fun VerticalScrollbar(): () -> Unit {
+//    TODO("Not yet implemented")
+//}

@@ -5,6 +5,7 @@
 xcuserdata
 !src/**/build/
 local.properties
+private-key.gpg
 .idea
 .DS_Store
 captures

@@ -1,15 +1,57 @@
+
+import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    id("com.vanniktech.maven.publish") version "0.30.0"
 }
+
+
+group = "com.kmpstudy" // 替换为你的 Group ID
+version = "0.3.0" // 版本号
+
+
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+
+    signAllPublications()
+
+    // 配置 POM 文件
+    pom {
+        name.set("CMP-Markdown")
+        description.set("A Kotlin Multiplatform Markdown Renderer")
+        url.set("https://github.com/HighSpringSun/CMP-Markdown")
+        licenses {
+            license {
+                name.set("Apache-2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+        developers {
+            developer {
+                id.set("HighSpringSun")
+                name.set("springsun")
+                email.set("434260666@qq.com")
+            }
+        }
+        scm {
+            connection.set("scm:git:git://github.com/HighSpringSun/CMP-Markdown.git")
+            url.set("https://github.com/HighSpringSun/CMP-Markdown")
+        }
+    }
+
+}
+
+
 
 kotlin {
     androidTarget {
@@ -17,8 +59,9 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
+//        publishLibraryVariants("release", "debug")
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -29,9 +72,9 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     jvm("desktop")
-    
+
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         moduleName = "composeApp"
@@ -51,10 +94,10 @@ kotlin {
         }
         binaries.executable()
     }
-    
+
     sourceSets {
         val desktopMain by getting
-        
+
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -68,11 +111,8 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
-
-
             // markdown
             implementation("org.jetbrains:markdown:0.7.3")
-
             // coil3
             implementation("io.coil-kt.coil3:coil-compose:3.0.4")
             implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.4")

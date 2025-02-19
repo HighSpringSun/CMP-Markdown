@@ -15,7 +15,7 @@ expect fun getPlatform(): Platform
 expect val supportVerticalBar: Boolean
 
 
-expect fun VerticalScrollbar(state: ScrollState, modifier: Modifier): @Composable () -> Unit
+//expect fun VerticalScrollbar(state: ScrollState, modifier: Modifier): @Composable () -> Unit
 
 //VerticalScrollbar(
 //adapter = rememberScrollbarAdapter(state),

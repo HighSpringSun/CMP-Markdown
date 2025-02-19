@@ -33,7 +33,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.SubcomposeAsyncImage
-import com.mywf.VerticalScrollbar
 import com.mywf.markdown.renderer.Table
 import com.mywf.markdown.constant.MarkdownElementTypeNames
 import com.mywf.markdown.util.checkNext
@@ -110,11 +109,11 @@ class MarkdownParser(private val markdownContent: String) {
                         }
                     }
                 }
-                VerticalScrollbar(
-                    state = state,
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                ).invoke()
+//                VerticalScrollbar(
+//                    state = state,
+//                    modifier = Modifier
+//                        .align(Alignment.CenterEnd)
+//                ).invoke()
             }
         }
     }
