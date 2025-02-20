@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastJoinToString
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import com.kmpstudy.composeapp.generated.resources.MapleMono_NF_CN_Regular
+//import com.kmpstudy.composeapp.generated.resources.MapleMono_NF_CN_Regular
 import com.kmpstudy.composeapp.generated.resources.Res
 import com.mywf.markdown.parser.MarkdownParser
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -36,14 +36,14 @@ fun main() = application {
         title = "CMP-Markdown",
     ) {
 //        App()
-        val fontFamily = FontFamily(
-            Font(
-                resource = Res.font.MapleMono_NF_CN_Regular
-            )
-        )
+//        val fontFamily = FontFamily(
+//            Font(
+//                resource = Res.font.MapleMono_NF_CN_Regular
+//            )
+//        )
         MaterialTheme(
             typography = Typography(
-                defaultFontFamily = fontFamily
+//                defaultFontFamily = fontFamily
 //                body1 = TextStyle().copy(
 //                    fontWeight = FontWeight.Normal,
 //                    fontSize = 18.sp,
