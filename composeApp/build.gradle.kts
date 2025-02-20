@@ -1,11 +1,9 @@
-
 import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
-import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -18,9 +16,13 @@ plugins {
 
 group = "com.kmpstudy" // 替换为你的 Group ID
 version = "0.3.0" // 版本号
+val artifactId = "cmp-markdown"
 
 
 mavenPublishing {
+
+    coordinates(group.toString(), artifactId, version.toString())
+
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
 
     signAllPublications()
