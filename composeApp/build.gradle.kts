@@ -34,7 +34,7 @@ mavenPublishing {
         url.set("https://github.com/HighSpringSun/CMP-Markdown")
         licenses {
             license {
-                name.set("Apache-2.0")
+                name.set("Apache License 2.0")
                 url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
             }
         }
@@ -144,9 +144,8 @@ android {
         }
     }
     buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
-        }
+//        debug { }
+        release { isMinifyEnabled = false }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
