@@ -1,4 +1,4 @@
-package com.mywf.markdown.util
+package com.kmpstudy.markdown.util
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.width

@@ -1,4 +1,4 @@
-package com.mywf.markdown.constant
+package com.kmpstudy.markdown.constant
 
 object MarkdownElementTypeNames {
     const val TEXT = "TEXT"

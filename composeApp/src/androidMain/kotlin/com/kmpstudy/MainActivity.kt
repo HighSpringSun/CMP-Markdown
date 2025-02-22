@@ -1,4 +1,4 @@
-package com.mywf
+package com.kmpstudy
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

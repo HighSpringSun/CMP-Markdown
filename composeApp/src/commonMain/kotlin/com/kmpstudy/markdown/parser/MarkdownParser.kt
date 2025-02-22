@@ -1,6 +1,5 @@
-package com.mywf.markdown.parser
+package com.kmpstudy.markdown.parser
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -33,17 +31,17 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.SubcomposeAsyncImage
-import com.mywf.markdown.renderer.Table
-import com.mywf.markdown.constant.MarkdownElementTypeNames
-import com.mywf.markdown.util.checkNext
-import com.mywf.model.markdown.exception.MarkdownParseTableException
-import com.mywf.markdown.util.findChildByName
-import com.mywf.markdown.util.getTableItemNumber
-import com.mywf.markdown.util.hasImage
-import com.mywf.markdown.util.isTable
-import com.mywf.markdown.util.splitByImage
-import com.mywf.markdown.util.splitList
-import com.mywf.markdown.util.styleByATX
+import com.kmpstudy.markdown.renderer.Table
+import com.kmpstudy.markdown.constant.MarkdownElementTypeNames
+import com.kmpstudy.markdown.util.checkNext
+import com.kmpstudy.model.markdown.exception.MarkdownParseTableException
+import com.kmpstudy.markdown.util.findChildByName
+import com.kmpstudy.markdown.util.getTableItemNumber
+import com.kmpstudy.markdown.util.hasImage
+import com.kmpstudy.markdown.util.isTable
+import com.kmpstudy.markdown.util.splitByImage
+import com.kmpstudy.markdown.util.splitList
+import com.kmpstudy.markdown.util.styleByATX
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.findChildOfType

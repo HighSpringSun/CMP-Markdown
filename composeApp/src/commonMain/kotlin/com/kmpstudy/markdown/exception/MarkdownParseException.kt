@@ -1,4 +1,4 @@
-package com.mywf.model.markdown.exception
+package com.kmpstudy.model.markdown.exception
 
 data class MarkdownParseException(val name: String) : RuntimeException(name)
 

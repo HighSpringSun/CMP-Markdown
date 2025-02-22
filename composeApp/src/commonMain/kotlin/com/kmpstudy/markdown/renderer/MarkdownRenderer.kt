@@ -1,4 +1,4 @@
-package com.mywf.markdown.renderer
+package com.kmpstudy.markdown.renderer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mywf.markdown.parser.MarkdownTableState
+import com.kmpstudy.markdown.parser.MarkdownTableState
 
 
 data class State(
