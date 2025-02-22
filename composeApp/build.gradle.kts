@@ -11,12 +11,13 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    id("com.vanniktech.maven.publish") version "0.30.0"
+    alias(libs.plugins.mavenPublishing)
+//    id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
 
 group = "com.kmpstudy" // 替换为你的 Group ID
-version = "0.3.0" // 版本号
+version = "0.3.1" // 版本号
 val artifactId = "cmp-markdown"
 
 

@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -31,10 +29,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.SubcomposeAsyncImage
-import com.kmpstudy.markdown.renderer.Table
 import com.kmpstudy.markdown.constant.MarkdownElementTypeNames
+import com.kmpstudy.markdown.localstate.LocalImageState
+import com.kmpstudy.markdown.renderer.Table
 import com.kmpstudy.markdown.util.checkNext
-import com.kmpstudy.model.markdown.exception.MarkdownParseTableException
 import com.kmpstudy.markdown.util.findChildByName
 import com.kmpstudy.markdown.util.getTableItemNumber
 import com.kmpstudy.markdown.util.hasImage
@@ -42,6 +40,7 @@ import com.kmpstudy.markdown.util.isTable
 import com.kmpstudy.markdown.util.splitByImage
 import com.kmpstudy.markdown.util.splitList
 import com.kmpstudy.markdown.util.styleByATX
+import com.kmpstudy.model.markdown.exception.MarkdownParseTableException
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.findChildOfType
@@ -67,60 +66,58 @@ class MarkdownParser(private val markdownContent: String) {
     private val flavour = CommonMarkFlavourDescriptor()
     private val parsedTree = MarkdownParser(flavour).buildMarkdownTreeFromString(markdownContent)
 
-    //    private val logger = KotlinLogging.logger("markdown logger")
     private var index = 0
 
 
-    fun parse(): @Composable () -> Unit {
-        printAstTree(parsedTree, markdownContent)
+    fun parse(
+        modifier: Modifier = Modifier,
+        enableASTInfo: Boolean = false
+    ): @Composable () -> Unit {
+        if (enableASTInfo) {
+            printAstTree(parsedTree, markdownContent)
+        }
         return {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.TopCenter
+            Column(
+                modifier = modifier,
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start
             ) {
-                val state = rememberScrollState()
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .verticalScroll(state),
-                ) {
-                    parsedTree.children.forEach { node ->
-                        if (node.type == MarkdownElementTypes.PARAGRAPH) {
-                            parsePARAGRAPH(node).invoke()
-                        } else if (
-                            node.type == MarkdownElementTypes.ATX_1 ||
-                            node.type == MarkdownElementTypes.ATX_2 ||
-                            node.type == MarkdownElementTypes.ATX_3 ||
-                            node.type == MarkdownElementTypes.ATX_4 ||
-                            node.type == MarkdownElementTypes.ATX_5
-                        ) {
-                            parseATX(node).invoke()
-                        } else if (node.type.name == MarkdownElementTypeNames.EOL) {
-                            parseEOL(node).invoke()
-                        } else if (node.type == MarkdownElementTypes.UNORDERED_LIST) {
-                            parseUNORDEREDLIST(node).invoke()
-                        } else if (node.type == MarkdownElementTypes.BLOCK_QUOTE) {
-                            parseBLOCKQUOTE(node).invoke()
-                        } else {
-                            parseElse(node).invoke()
-                        }
+                parsedTree.children.forEach { node ->
+                    if (node.type == MarkdownElementTypes.PARAGRAPH) {
+                        parsePARAGRAPH(node).invoke()
+                    } else if (
+                        node.type == MarkdownElementTypes.ATX_1 ||
+                        node.type == MarkdownElementTypes.ATX_2 ||
+                        node.type == MarkdownElementTypes.ATX_3 ||
+                        node.type == MarkdownElementTypes.ATX_4 ||
+                        node.type == MarkdownElementTypes.ATX_5
+                    ) {
+                        parseATX(node).invoke()
+                    } else if (node.type.name == MarkdownElementTypeNames.EOL) {
+                        parseEOL(node).invoke()
+                    } else if (node.type == MarkdownElementTypes.UNORDERED_LIST) {
+                        parseUNORDEREDLIST(node).invoke()
+                    } else if (node.type == MarkdownElementTypes.BLOCK_QUOTE) {
+                        parseBLOCKQUOTE(node).invoke()
+                    } else if (node.type == MarkdownElementTypes.LINK_DEFINITION) {
+                        parseLINKDEFINITION(node).invoke()
+                    } else {
+                        parseElse(node).invoke()
                     }
                 }
-//                VerticalScrollbar(
-//                    state = state,
-//                    modifier = Modifier
-//                        .align(Alignment.CenterEnd)
-//                ).invoke()
             }
         }
     }
 
-//    fun parseText(nodes: List<ASTNode>): @Composable () -> Unit {
-//
-//    }
+    private fun parseLINKDEFINITION(node: ASTNode): @Composable () -> Unit = {
+        val title = node.findChildOfType(MarkdownElementTypes.LINK_TITLE)
+        if (title != null) {
+            Text(title.getTextInNode(markdownContent).toString())
+        }
+    }
 
-    fun parsePARAGRAPH(node: ASTNode): @Composable () -> Unit = {
+
+    private fun parsePARAGRAPH(node: ASTNode): @Composable () -> Unit = {
         if (node.isTable(markdownContent)) {
             Table(parseTable(node))
         } else if (node.hasImage()) {
@@ -130,15 +127,12 @@ class MarkdownParser(private val markdownContent: String) {
                 if (nodes.size == 1 && nodes.first().type == MarkdownElementTypes.IMAGE) {
                     val imgNode = nodes.first()
                     val imageState = parseImage(imgNode)
-                    val baseUrl =
-                        "https://resources.jetbrains.com/help/img/kotlin-multiplatform-dev/"
-//                    println("$baseUrl${imageState.linkDestination}")
+                    val baseUrl = LocalImageState.current.baseUrl
                     val modifier = if (index + 1 < nodeList.size &&
                         nodeList[index + 1].isNotEmpty() &&
                         nodeList[index + 1].first().getTextInNode(markdownContent).startsWith('{')
                     ) {
                         Modifier
-//                            .fillMaxWidth(0.35f)
                     } else {
                         Modifier
                     }
@@ -170,11 +164,11 @@ class MarkdownParser(private val markdownContent: String) {
         }
     }
 
-    fun parseATX(node: ASTNode): @Composable () -> Unit {
+    private fun parseATX(node: ASTNode): @Composable () -> Unit {
         return {
             val annotatedString = buildAnnotatedString {
-                node.findChildByName("ATX_CONTENT")!!.children.forEach {
-                    if (it.type.name != "WHITE_SPACE") {
+                node.findChildByName(MarkdownElementTypeNames.ATX_CONTENT)!!.children.forEach {
+                    if (it.type.name != MarkdownElementTypeNames.WHITE_SPACE) {
                         append(it.getTextInNode(markdownContent))
                     }
                 }
@@ -186,21 +180,18 @@ class MarkdownParser(private val markdownContent: String) {
         }
     }
 
-    fun parseEOL(node: ASTNode): @Composable () -> Unit {
+    private fun parseEOL(node: ASTNode): @Composable () -> Unit {
+        require(node.type.name == MarkdownElementTypeNames.EOL)
         return {
             Box(
                 modifier = Modifier
-//                    .border(1.dp, Color.Black)
                     .fillMaxWidth()
                     .height(16.dp)
-//                    .background(Color.LightGray)
-            ) {
-//                Text(node.type.toString())
-            }
+            )
         }
     }
 
-    fun parseUNORDEREDLIST(node: ASTNode): @Composable () -> Unit = {
+    private fun parseUNORDEREDLIST(node: ASTNode): @Composable () -> Unit = {
         val list = parseUnorderedList(node)
         Column {
             list.forEach {
@@ -210,9 +201,12 @@ class MarkdownParser(private val markdownContent: String) {
 
     }
 
-    fun parseBLOCKQUOTE(node: ASTNode): @Composable () -> Unit = {
+    private fun parseBLOCKQUOTE(node: ASTNode): @Composable () -> Unit = {
         val list = parseBlockQuote(node)
         val index = node.parent!!.children.indexOf(node) + 2
+//        if (index < parsedTree.children.size && parsedTree.children[index].type == MarkdownElementTypes.PARAGRAPH) {
+//
+//        }
         val modifier = if (index < parsedTree.children.size) {
             val styleNode = parsedTree.children[index]
             styleNode.checkNext(markdownContent)
@@ -220,8 +214,7 @@ class MarkdownParser(private val markdownContent: String) {
             Modifier
         }
         Row(
-            modifier = Modifier
-                .then(modifier)
+            modifier = modifier
                 .fillMaxWidth()
                 .padding(24.dp)
         ) {
@@ -246,14 +239,14 @@ class MarkdownParser(private val markdownContent: String) {
         }
     }
 
-    fun parseElse(node: ASTNode): @Composable () -> Unit {
+    private fun parseElse(node: ASTNode): @Composable () -> Unit {
         return {
             Text(node.type.toString())
         }
     }
 
 
-    fun parseTable(node: ASTNode): MarkdownTableState {
+    private fun parseTable(node: ASTNode): MarkdownTableState {
         val tableList = splitList(node.children) { it.type.name == MarkdownElementTypeNames.EOL }
         if (tableList.size < 3) {
             throw MarkdownParseTableException("size less than 3")
@@ -297,7 +290,7 @@ class MarkdownParser(private val markdownContent: String) {
         )
     }
 
-    fun parseImage(imgNode: ASTNode): MarkdownImageState {
+    private fun parseImage(imgNode: ASTNode): MarkdownImageState {
         val inlineLink =
             imgNode.findChildOfType(MarkdownElementTypes.INLINE_LINK)!!
         val linkText =
@@ -310,6 +303,8 @@ class MarkdownParser(private val markdownContent: String) {
 
         val extraAttrs =
             imgNode.findChildByName(MarkdownElementTypeNames.TEXT)?.getTextInNode(markdownContent)
+
+        @Suppress("UNUSED")
         val widthModifier = if (extraAttrs != null) {
             val width =
                 extraAttrs.toString().substringAfter('=').trimEnd { it == '}' }
@@ -395,17 +390,6 @@ class MarkdownParser(private val markdownContent: String) {
                         } else {
                             append(content.replace(Regex("\\R"), ""))
                         }
-//
-//                        if ((i == 0 || i == 1) && (parNode.type.name == "EOL" || parNode.type.name == "WHITE_SPACE")) {
-////                            continue
-//                        } else
-//                        else if (parNode.type.name == MarkdownElementTypeNames.WHITE_SPACE &&
-//                            content.first() == '\r' &&
-//                            i + 1 < nodes.size &&
-//                            nodes[i + 1].type.name == MarkdownElementTypeNames.EOL
-//                        ) {
-////                            continue
-//                        }
                     }
                 }
                 i++
@@ -449,12 +433,12 @@ class MarkdownParser(private val markdownContent: String) {
         }
     }
 
-    fun parseText(node: ASTNode): AnnotatedString {
+    private fun parseText(node: ASTNode): AnnotatedString {
         return parseText(node.children)
     }
 
 
-    fun parseBlockQuote(node: ASTNode): List<AnnotatedString> {
+    private fun parseBlockQuote(node: ASTNode): List<AnnotatedString> {
         val result = mutableListOf<AnnotatedString>()
         node.children.forEach { itemNode ->
             when (itemNode.type) {
@@ -543,12 +527,7 @@ class MarkdownParser(private val markdownContent: String) {
             }
         }
 
-//        if (index < 1000) {
-//            println(nodeInfo)
-////            logger.debug { nodeInfo }
-//        }
         println(nodeInfo)
-
 
         val lastChildIndex = node.children.lastIndex
         node.children.forEachIndexed { index, child ->

@@ -26,23 +26,7 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "CMP-Markdown",
     ) {
-//        App()
-//        val fontFamily = FontFamily(
-//            Font(
-//                resource = Res.font.MapleMono_NF_CN_Regular
-//            )
-//        )
-        MaterialTheme(
-            typography = Typography(
-//                defaultFontFamily = fontFamily
-//                body1 = TextStyle().copy(
-//                    fontWeight = FontWeight.Normal,
-//                    fontSize = 18.sp,
-//                    lineHeight = 22.sp,
-//                    letterSpacing = 0.5.sp
-//                )
-            )
-        ) {
+        MaterialTheme{
             var markdownContent by remember { mutableStateOf("") }
             LaunchedEffect(Unit) {
 //                val file = "supported-platforms-zh-cn" //-zh-cn
@@ -67,9 +51,6 @@ fun main() = application {
                             parser.parse().invoke()
                         }
                     }
-//                    androidx.compose.foundation.VerticalScrollbar(
-//                        adapter = rememberScrollbarAdapter()
-//                    )
                 }
             }
         }
