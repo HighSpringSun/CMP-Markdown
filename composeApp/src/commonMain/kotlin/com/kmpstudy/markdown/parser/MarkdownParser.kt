@@ -37,6 +37,7 @@ import com.kmpstudy.markdown.util.findChildByName
 import com.kmpstudy.markdown.util.getTableItemNumber
 import com.kmpstudy.markdown.util.hasImage
 import com.kmpstudy.markdown.util.isTable
+import com.kmpstudy.markdown.util.isUrl
 import com.kmpstudy.markdown.util.splitByImage
 import com.kmpstudy.markdown.util.splitList
 import com.kmpstudy.markdown.util.styleByATX
@@ -364,7 +365,9 @@ class MarkdownParser(private val markdownContent: String) {
                             )
                         )
                         append(linkText)
-                        append("\u2197")
+                        if (linkDestination.isUrl()) {
+                            append("\u2197")
+                        }
                         pop()
                     }
 

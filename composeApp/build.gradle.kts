@@ -161,11 +161,11 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "com.mywf.MainKt"
+        mainClass = "com.kmpstudy.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.mywf"
+            packageName = "com.kmpstudy"
             packageVersion = "1.0.0"
         }
     }
