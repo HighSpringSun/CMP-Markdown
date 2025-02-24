@@ -11,7 +11,7 @@ Add the dependency below to your **module**'s `build.gradle.kts` file:
 sourceSets {
     val commonMain by getting {
         dependencies {
-            implementation("com.kmpstudy:cmp-markdown:0.3.0")
+            implementation("com.kmpstudy:cmp-markdown:0.3.1")
         }
     }
 }
