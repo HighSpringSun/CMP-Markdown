@@ -6,4 +6,5 @@ object MarkdownElementTypeNames {
     const val EOL = "EOL"
     const val HASH = "#"
     const val V_LINE = "|"
+    const val ATX_CONTENT = "ATX_CONTENT"
 }

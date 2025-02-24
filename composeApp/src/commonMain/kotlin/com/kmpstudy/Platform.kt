@@ -1,5 +1,5 @@
 package com.kmpstudy
 
 
-expect val supportVerticalBar: Boolean
+//expect val supportVerticalBar: Boolean
 
