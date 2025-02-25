@@ -1,9 +1,12 @@
 package com.kmpstudy.markdown.parser
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -102,12 +105,24 @@ class MarkdownParser(private val markdownContent: String) {
                         parseBLOCKQUOTE(node).invoke()
                     } else if (node.type == MarkdownElementTypes.LINK_DEFINITION) {
                         parseLINKDEFINITION(node).invoke()
+                    } else if (node.type.name == MarkdownElementTypeNames.HORIZONTAL_RULE) {
+                        parseHORIZONTALRULE(node).invoke()
                     } else {
                         parseElse(node).invoke()
                     }
                 }
             }
         }
+    }
+
+    private fun parseHORIZONTALRULE(node: ASTNode): @Composable () -> Unit = {
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(Color(221, 221, 221))
+
+        )
     }
 
     private fun parseLINKDEFINITION(node: ASTNode): @Composable () -> Unit = {

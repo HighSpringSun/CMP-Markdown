@@ -7,4 +7,5 @@ object MarkdownElementTypeNames {
     const val HASH = "#"
     const val V_LINE = "|"
     const val ATX_CONTENT = "ATX_CONTENT"
+    const val HORIZONTAL_RULE = "HORIZONTAL_RULE"
 }

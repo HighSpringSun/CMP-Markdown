@@ -38,7 +38,8 @@ fun main() = application {
         MaterialTheme {
             var markdownContent by remember { mutableStateOf("") }
             LaunchedEffect(Unit) {
-                val filePath = "C:\\Users\\cygao\\Desktop\\supported-platforms-zh-cn.md"
+//                val filePath = "C:\\Users\\cygao\\Desktop\\supported-platforms-zh-cn.md"
+                val filePath = "C:\\Users\\cygao\\Desktop\\case-studies.md"
                 val markdown = File(filePath).readText().replace("\r\n", "\n")
                 markdownContent = markdown
             }
