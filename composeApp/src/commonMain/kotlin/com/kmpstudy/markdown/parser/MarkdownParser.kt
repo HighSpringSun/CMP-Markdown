@@ -9,10 +9,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -100,6 +101,8 @@ class MarkdownParser(private val markdownContent: String) {
                         parseEOL(node).invoke()
                     } else if (node.type == MarkdownElementTypes.UNORDERED_LIST) {
                         parseUNORDEREDLIST(node).invoke()
+                    } else if (node.type == MarkdownElementTypes.ORDERED_LIST) {
+                        parseORDEREDLIST(node).invoke()
                     } else if (node.type == MarkdownElementTypes.BLOCK_QUOTE) {
                         parseBLOCKQUOTE(node).invoke()
                     } else if (node.type == MarkdownElementTypes.LINK_DEFINITION) {
@@ -115,7 +118,7 @@ class MarkdownParser(private val markdownContent: String) {
     }
 
     private fun parseHORIZONTALRULE(node: ASTNode): @Composable () -> Unit = {
-        require(node.type.name==MarkdownElementTypeNames.HORIZONTAL_RULE)
+        require(node.type.name == MarkdownElementTypeNames.HORIZONTAL_RULE)
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
@@ -209,6 +212,16 @@ class MarkdownParser(private val markdownContent: String) {
 
     private fun parseUNORDEREDLIST(node: ASTNode): @Composable () -> Unit = {
         val list = parseUnorderedList(node)
+        Column {
+            list.forEach {
+                Text(it)
+            }
+        }
+
+    }
+
+    private fun parseORDEREDLIST(node: ASTNode): @Composable () -> Unit = {
+        val list = parseOrderedList(node)
         Column {
             list.forEach {
                 Text(it)
@@ -317,18 +330,18 @@ class MarkdownParser(private val markdownContent: String) {
             inlineLink.findChildOfType(MarkdownElementTypes.LINK_DESTINATION)!!
                 .getTextInNode(markdownContent).toString()
 
-        val extraAttrs =
-            imgNode.findChildByName(MarkdownElementTypeNames.TEXT)?.getTextInNode(markdownContent)
+//        val extraAttrs =
+//            imgNode.findChildByName(MarkdownElementTypeNames.TEXT)?.getTextInNode(markdownContent)
 
-        @Suppress("UNUSED")
-        val widthModifier = if (extraAttrs != null) {
-            val width =
-                extraAttrs.toString().substringAfter('=').trimEnd { it == '}' }
-                    .toInt()
-            Modifier.width(width.dp)
-        } else {
-            Modifier
-        }
+//        @Suppress("UNUSED")
+//        val widthModifier = if (extraAttrs != null) {
+//            val width =
+//                extraAttrs.toString().substringAfter('=').trimEnd { it == '}' }
+//                    .toInt()
+//            Modifier.width(width.dp)
+//        } else {
+//            Modifier
+//        }
         return MarkdownImageState(
             linkText.toString(),
             linkDestination,
@@ -387,14 +400,34 @@ class MarkdownParser(private val markdownContent: String) {
                     }
 
                     MarkdownElementTypes.CODE_SPAN -> {
-                        val code = parNode.findChildByName(MarkdownElementTypeNames.TEXT)!!
-                            .getTextInNode(markdownContent)
                         withStyle(
                             style = SpanStyle(
                                 background = Color(243, 243, 243)
                             )
                         ) {
-                            append(code)
+                            parNode.children.forEach { node ->
+                                if (node.type.name != MarkdownElementTypeNames.BACKTICK) {
+                                    append(node.getTextInNode(markdownContent))
+                                }
+                            }
+                        }
+                    }
+
+                    MarkdownElementTypes.CODE_FENCE -> {
+                        withStyle(
+                            style = SpanStyle(
+                                background = Color(243, 243, 243)
+                            )
+                        ) {
+                            val lang =
+                                parNode.findChildByName(MarkdownElementTypeNames.FENCE_LANG)!!
+                                    .getTextInNode(markdownContent)
+                            val content =
+                                parNode.findChildByName(MarkdownElementTypeNames.CODE_FENCE_CONTENT)!!
+                                    .getTextInNode(markdownContent)
+                            append(lang)
+                            append("\n")
+                            append(content)
                         }
                     }
 
@@ -467,12 +500,14 @@ class MarkdownParser(private val markdownContent: String) {
                 MarkdownElementTypes.UNORDERED_LIST -> {
                     result.addAll(parseUnorderedList(itemNode))
                 }
+
+
             }
         }
         return result
     }
 
-    private fun parseListItem(itemNode: ASTNode): AnnotatedString {
+    private fun parseListItem(itemNode: ASTNode, level: Int = 0): AnnotatedString {
         return buildAnnotatedString {
             itemNode.children.forEach { node ->
                 when (node.type) {
@@ -484,16 +519,22 @@ class MarkdownParser(private val markdownContent: String) {
                                         textIndent = TextIndent(firstLine = 0.sp, restLine = 20.sp)
                                     )
                                 ) {
+                                    append("   ".repeat(level))
                                     append("\u2022  ")
                                     append(parseText(node))
-//                                    append(AnnotatedString("\u2022  ${parseText(node)}"))
                                 }
                             }
                         )
                     }
 
                     MarkdownElementTypes.UNORDERED_LIST -> {
-                        parseUnorderedList(node).forEach {
+                        parseUnorderedList(node, level + 1).forEach {
+                            append(it)
+                        }
+                    }
+
+                    MarkdownElementTypes.ORDERED_LIST -> {
+                        parseOrderedList(node, level + 1).forEach {
                             append(it)
                         }
                     }
@@ -509,11 +550,14 @@ class MarkdownParser(private val markdownContent: String) {
         }
     }
 
-    private fun parseUnorderedList(node: ASTNode): List<AnnotatedString> {
+    private fun parseUnorderedList(
+        node: ASTNode,
+        level: Int = 0,
+    ): List<AnnotatedString> {
         val result = mutableListOf<AnnotatedString>()
         node.children.forEach { itemNode ->
             if (itemNode.type == MarkdownElementTypes.LIST_ITEM) {
-                result.add(parseListItem(itemNode))
+                result.add(parseListItem(itemNode, level))
             } else if (itemNode.type.name == MarkdownElementTypeNames.EOL) {
                 result.add(AnnotatedString(""))
             } else {
@@ -521,6 +565,92 @@ class MarkdownParser(private val markdownContent: String) {
             }
         }
         return result
+    }
+
+
+    private fun parseOrderedListItem(
+        itemNode: ASTNode,
+        level: Int = 0,
+    ): AnnotatedString {
+        return buildAnnotatedString {
+            var index: CharSequence = ""
+            var consumed = false
+            itemNode.children.forEach { node ->
+                if (node.type.name == MarkdownElementTypeNames.LIST_NUMBER) {
+                    index = node.getTextInNode(markdownContent)
+                } else if (node.type == MarkdownElementTypes.PARAGRAPH) {
+                    append(
+                        buildAnnotatedString {
+                            withStyle(
+                                style = ParagraphStyle(
+                                    textIndent = TextIndent(firstLine = 0.sp, restLine = 20.sp)
+                                )
+                            ) {
+                                append("   ".repeat(level))
+                                if (!consumed) {
+                                    append("$index ")
+                                    consumed = true
+                                } else {
+                                    append("    ")
+                                }
+                                append(parseText(node))
+                            }
+                        }
+                    )
+                } else if (node.type == MarkdownElementTypes.UNORDERED_LIST) {
+                    parseUnorderedList(node, level + 1).forEach {
+                        append(it)
+                    }
+                } else if (node.type == MarkdownElementTypes.ORDERED_LIST) {
+                    parseOrderedList(node, level + 1).forEach {
+                        append(it)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun parseOrderedList(
+        node: ASTNode,
+        level: Int = 0
+    ): List<AnnotatedString> {
+        val result = mutableListOf<AnnotatedString>()
+        node.children.forEach { itemNode ->
+            if (itemNode.type == MarkdownElementTypes.LIST_ITEM) {
+                result.add(parseOrderedListItem(itemNode, level))
+            } else if (itemNode.type.name == MarkdownElementTypeNames.EOL) {
+                result.add(AnnotatedString(""))
+            }
+        }
+        return result
+    }
+
+    private fun parseCODEFENCE(node: ASTNode): @Composable () -> Unit = {
+        val lang =
+            node.findChildByName(MarkdownElementTypeNames.FENCE_LANG)!!
+                .getTextInNode(markdownContent)
+        val content =
+            node.findChildByName(MarkdownElementTypeNames.CODE_FENCE_CONTENT)!!
+                .getTextInNode(markdownContent)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(25, 25, 28), RoundedCornerShape(8.dp)),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Icon(
+                    Icons.Default.ArrowDropDown,
+                    contentDescription = "expand"
+                )
+                Text(lang.toString())
+            }
+            Text(content.toString())
+        }
     }
 
     private fun parseSTRONG(node: ASTNode): AnnotatedString = buildAnnotatedString {

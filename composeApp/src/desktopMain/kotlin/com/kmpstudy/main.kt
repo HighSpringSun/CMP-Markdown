@@ -33,7 +33,8 @@ fun main() = application {
             var markdownContent by remember { mutableStateOf("") }
             LaunchedEffect(Unit) {
 //                val filePath = "C:\\Users\\cygao\\Desktop\\supported-platforms-zh-cn.md"
-                val filePath = "C:\\Users\\cygao\\Desktop\\case-studies.md"
+                val filePath = "C:\\Users\\cygao\\Desktop\\multiplatform-setup.md"
+//                val filePath = "C:\\Users\\cygao\\Desktop\\kotlin-multiplatform-roadmap.md"
                 val markdown = File(filePath).readText().replace("\r\n", "\n")
                 markdownContent = markdown
             }
@@ -45,7 +46,7 @@ fun main() = application {
                             .fillMaxSize(),
                         contentAlignment = Alignment.TopCenter
                     ) {
-                        parser.parse().invoke()
+                        parser.parse(enableASTInfo = true).invoke()
                     }
                 }
             }
