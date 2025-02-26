@@ -105,8 +105,12 @@ class MarkdownParser(private val markdownContent: String) {
                         parseORDEREDLIST(node).invoke()
                     } else if (node.type == MarkdownElementTypes.BLOCK_QUOTE) {
                         parseBLOCKQUOTE(node).invoke()
+                    } else if (node.type == MarkdownElementTypes.CODE_FENCE) {
+                        parseCODEFENCE(node).invoke()
                     } else if (node.type == MarkdownElementTypes.LINK_DEFINITION) {
                         parseLINKDEFINITION(node).invoke()
+                    } else if (node.type == MarkdownElementTypes.HTML_BLOCK) {
+                        parseHTMLBLOCK(node).invoke()
                     } else if (node.type.name == MarkdownElementTypeNames.HORIZONTAL_RULE) {
                         parseHORIZONTALRULE(node).invoke()
                     } else {
@@ -114,6 +118,15 @@ class MarkdownParser(private val markdownContent: String) {
                     }
                 }
             }
+        }
+    }
+
+
+    private fun parseHTMLBLOCK(node: ASTNode): @Composable () -> Unit = {
+        Box(
+            modifier = Modifier
+        ) {
+            Text(node.getTextInNode(markdownContent).toString())
         }
     }
 
