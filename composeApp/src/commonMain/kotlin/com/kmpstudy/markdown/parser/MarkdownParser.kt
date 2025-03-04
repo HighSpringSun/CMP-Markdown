@@ -96,8 +96,10 @@ class MarkdownParser(private val markdownContent: String) {
                         node.type == MarkdownElementTypes.ATX_4 ||
                         node.type == MarkdownElementTypes.ATX_5
                     ) {
-                        parseATX(node).invoke()
+                        header(node)
+//                        parseATX(node).invoke()
                     } else if (node.type.name == MarkdownElementTypeNames.EOL) {
+                        eol(node)
                         parseEOL(node).invoke()
                     } else if (node.type == MarkdownElementTypes.UNORDERED_LIST) {
                         parseUNORDEREDLIST(node).invoke()
@@ -196,6 +198,22 @@ class MarkdownParser(private val markdownContent: String) {
         }
     }
 
+
+    @Composable
+    private fun header(node: ASTNode) {
+        val annotatedString = buildAnnotatedString {
+            node.findChildByName(MarkdownElementTypeNames.ATX_CONTENT)!!.children.forEach {
+                if (it.type.name != MarkdownElementTypeNames.WHITE_SPACE) {
+                    append(it.getTextInNode(markdownContent))
+                }
+            }
+        }
+        Text(
+            text = annotatedString,
+            style = node.styleByATX()
+        )
+    }
+
     private fun parseATX(node: ASTNode): @Composable () -> Unit {
         return {
             val annotatedString = buildAnnotatedString {
@@ -211,6 +229,18 @@ class MarkdownParser(private val markdownContent: String) {
             )
         }
     }
+
+
+    @Composable
+    private fun eol(node: ASTNode) {
+        require(node.type.name == MarkdownElementTypeNames.EOL)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(16.dp)
+        )
+    }
+
 
     private fun parseEOL(node: ASTNode): @Composable () -> Unit {
         require(node.type.name == MarkdownElementTypeNames.EOL)
