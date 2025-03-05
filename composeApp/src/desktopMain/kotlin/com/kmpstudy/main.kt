@@ -3,6 +3,7 @@ package com.kmpstudy
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
@@ -20,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import com.kmpstudy.markdown.parser.MarkdownParser
+import com.kmpstudy.markdown.CMPMarkdown
 import java.io.File
 
 
@@ -32,21 +33,37 @@ fun main() = application {
         MaterialTheme {
             var markdownContent by remember { mutableStateOf("") }
             LaunchedEffect(Unit) {
-//                val filePath = "C:\\Users\\cygao\\Desktop\\supported-platforms-zh-cn.md"
-                val filePath = "C:\\Users\\cygao\\Desktop\\multiplatform-setup.md"
+                val filePath = "C:\\Users\\cygao\\Desktop\\supported-platforms.md"
+//                val filePath = "C:\\Users\\cygao\\Desktop\\multiplatform-setup.md"
 //                val filePath = "C:\\Users\\cygao\\Desktop\\kotlin-multiplatform-roadmap.md"
                 val markdown = File(filePath).readText().replace("\r\n", "\n")
                 markdownContent = markdown
             }
             if (markdownContent.isNotEmpty()) {
-                val parser = remember { MarkdownParser(markdownContent) }
+//                val parser = remember { MarkdownParser(markdownContent) }
                 SelectionContainer {
                     VerticalScrollBox(
                         modifier = Modifier
                             .fillMaxSize(),
                         contentAlignment = Alignment.TopCenter
                     ) {
-                        parser.parse(enableASTInfo = true).invoke()
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.8f)
+                        ) {
+                            CMPMarkdown(markdownContent)
+//                            MarkdownDocument(
+//                                markdown = markdownContent,
+//                                textStyles = m3TextStyles(),
+//                                textStyleModifiers = m3TextStyleModifiers(),
+//                                blockQuoteStyle = m3BlockQuoteStyle(),
+//                                codeBlockStyle = m3CodeBlockStyle(),
+//                                ruleStyle = m3RuleStyle(),
+//                                tableStyle = m3TableStyle(),
+//                                onLinkClick = {}
+//                            )
+                        }
+//                        parser.parse(enableASTInfo = true).invoke()
                     }
                 }
             }
