@@ -693,11 +693,22 @@ class MarkdownParser(private val markdownContent: String) {
     @Composable
     private fun UnorderedListItem(itemNode: ASTNode, level: Int = 0) {
         itemNode.children.forEach { node ->
-            if (node.type.name != "LIST_BULLET" && node.type.name != MarkdownElementTypeNames.WHITE_SPACE) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text("\u2022")
+            println("AAA ${node.type}")
+            when (node.type) {
+                MarkdownElementTypes.PARAGRAPH -> {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text("\u2022")
+                        MarkdownNode(node)
+                    }
+                }
+
+                MarkdownElementTypes.UNORDERED_LIST -> {
+                    MarkdownNode(node)
+                }
+
+                MarkdownElementTypes.ORDERED_LIST -> {
                     MarkdownNode(node)
                 }
             }
