@@ -34,6 +34,7 @@ fun main() = application {
             var markdownContent by remember { mutableStateOf("") }
             LaunchedEffect(Unit) {
 //                val filePath = "C:\\Users\\cygao\\Desktop\\supported-platforms.md"
+//                val filePath = "C:\\Users\\cygao\\Desktop\\supported-platforms-zh-cn.md"
 //                val filePath = "C:\\Users\\cygao\\Desktop\\multiplatform-setup.md"
                 val filePath = "C:\\Users\\cygao\\Desktop\\kotlin-multiplatform-roadmap.md"
                 val markdown = File(filePath).readText().replace("\r\n", "\n")
