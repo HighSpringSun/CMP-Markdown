@@ -12,4 +12,5 @@ object MarkdownElementTypeNames {
     const val BACKTICK = "BACKTICK"
     const val FENCE_LANG = "FENCE_LANG"
     const val CODE_FENCE_CONTENT = "CODE_FENCE_CONTENT"
+    const val LIST_BULLET = "LIST_BULLET"
 }
