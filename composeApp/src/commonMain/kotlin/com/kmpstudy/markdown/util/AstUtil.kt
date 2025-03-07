@@ -158,7 +158,6 @@ fun parseStyleString(input: CharSequence): Pair<String, String>? {
 fun ASTNode.checkNext(markdownContent: String): Modifier {
     require(type == MarkdownElementTypes.PARAGRAPH) { type }
     val pair = parseStyleString(getTextInNode(markdownContent))
-//    println(pair)
     return if (pair == null) {
         Modifier
     } else {
@@ -168,6 +167,11 @@ fun ASTNode.checkNext(markdownContent: String): Modifier {
                     "note" -> {
                         Modifier
                             .background(Color(225, 241, 225), RoundedCornerShape(6.dp))
+                    }
+
+                    "tip" -> {
+                        Modifier
+                            .background(Color(25, 25, 28, 13), RoundedCornerShape(6.dp))
                     }
 
                     else -> {

@@ -201,7 +201,7 @@ class MarkdownParser(private val markdownContent: String) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(16.dp)
+                .height(12.dp)
         )
     }
 
@@ -220,6 +220,13 @@ class MarkdownParser(private val markdownContent: String) {
 
     @Composable
     private fun BlockQuote(node: ASTNode) {
+//        val index = node.parent!!.children.indexOf(node) + 2
+//        val modifier = if (index < parsedTree.children.size) {
+//            val styleNode = parsedTree.children[index]
+//            styleNode.checkNext(markdownContent)
+//        } else {
+//            Modifier
+//        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -239,44 +246,6 @@ class MarkdownParser(private val markdownContent: String) {
             ) {
                 node.children.forEach { childNode ->
                     MarkdownNode(childNode)
-                }
-            }
-        }
-    }
-
-    private fun parseBLOCKQUOTE(node: ASTNode): @Composable () -> Unit = {
-        val list = parseBlockQuote(node)
-        val index = node.parent!!.children.indexOf(node) + 2
-//        if (index < parsedTree.children.size && parsedTree.children[index].type == MarkdownElementTypes.PARAGRAPH) {
-//
-//        }
-        val modifier = if (index < parsedTree.children.size) {
-            val styleNode = parsedTree.children[index]
-            styleNode.checkNext(markdownContent)
-        } else {
-            Modifier
-        }
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(24.dp)
-        ) {
-            Icon(
-                Icons.Filled.Info,
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(end = 24.dp),
-                tint = Color(108, 185, 105)
-            )
-            Column(
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.Start
-            ) {
-                list.forEach { annotatedString ->
-                    Text(
-                        text = annotatedString,
-                        modifier = Modifier
-                    )
                 }
             }
         }
@@ -360,83 +329,6 @@ class MarkdownParser(private val markdownContent: String) {
         )
     }
 
-//    @Composable
-//    private fun Strong(node: ASTNode) {
-//        require(node.type == MarkdownElementTypes.STRONG)
-//        val annotatedString = buildAnnotatedString {
-//            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-//                node.children.forEach { childNode ->
-//                    // todo  一个非常奇怪的问题，不能使用type比较因为一直不相等，所以只能用name先比较
-//                    if (childNode.type.name != MarkdownElementTypes.EMPH.name) {
-//                        append(childNode.getTextInNode(markdownContent))
-//                    }
-//                }
-//            }
-//        }
-//        Text(
-//            text = annotatedString
-//        )
-//    }
-//
-//    @Composable
-//    private fun InlineLink(node: ASTNode) {
-//        val annotatedString = buildAnnotatedString {
-//            val linkText =
-//                node.findChildOfType(MarkdownElementTypes.LINK_TEXT)!!
-//                    .getTextInNode(markdownContent)
-//                    .trim { it == '[' || it == ']' }
-//            val linkDestination =
-//                node.findChildOfType(MarkdownElementTypes.LINK_DESTINATION)!!
-//                    .getTextInNode(markdownContent).toString()
-//            pushLink(
-//                LinkAnnotation.Url(
-//                    linkDestination,
-//                    styles = TextLinkStyles(
-//                        style = SpanStyle(
-//                            color = Color(48, 127, 255)
-//                        ),
-//                        hoveredStyle = SpanStyle(
-//                            color = Color(48, 127, 255),
-//                            textDecoration = TextDecoration.Underline
-//                        )
-//                    )
-//                )
-//            )
-//            append(linkText)
-//            if (linkDestination.isUrl()) {
-//                append("\u2197")
-//            }
-//            pop()
-//        }
-//        Text(
-//            text = annotatedString
-//        )
-//    }
-//
-//    @Composable
-//    private fun CodeSpan(node: ASTNode) {
-//        Box(
-//            modifier = Modifier
-//                .background(Color.Green)
-////                .background(Color(243, 243, 243), RoundedCornerShape(6.dp))
-//                .padding(2.dp),
-//            contentAlignment = Alignment.Center
-//        ) {
-//            val code = node.children
-//                .filter { it.type.name != MarkdownElementTypeNames.BACKTICK }
-//                .joinToString(separator = "") { it.getTextInNode(markdownContent) }
-//            Text(
-//                text = code
-//            )
-//        }
-//    }
-
-//    @Composable
-//    private fun Text(node: ASTNode) {
-//        Text(node.children)
-//    }
-
-
     @Composable
     private fun Image(node: ASTNode) {
         val imageState = parseImage(node)
@@ -466,6 +358,7 @@ class MarkdownParser(private val markdownContent: String) {
                 val parNode = nodes[i]
 
                 when (parNode.type) {
+
                     MarkdownElementTypes.STRONG -> {
                         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
                             append(parseSTRONG(parNode))
@@ -548,8 +441,10 @@ class MarkdownParser(private val markdownContent: String) {
                             nodes[i + 1].type.name == MarkdownElementTypeNames.EOL
                         ) {
                             append("\n\n")
+                        } else if (parNode.type.name == MarkdownElementTypeNames.WHITE_SPACE && content.length > 1) {
+//                            append(" ")
                         } else {
-                            append(content.replace(Regex("\\R"), ""))
+                            append(content.replace(Regex("\\R"), " "))
                         }
                     }
                 }
@@ -563,33 +458,13 @@ class MarkdownParser(private val markdownContent: String) {
         return parseText(node.children)
     }
 
-
-    private fun parseBlockQuote(node: ASTNode): List<AnnotatedString> {
-        val result = mutableListOf<AnnotatedString>()
-        node.children.forEach { itemNode ->
-            when (itemNode.type) {
-                MarkdownElementTypes.PARAGRAPH -> {
-                    result.add(parseText(itemNode))
-                }
-
-                MarkdownElementTypes.UNORDERED_LIST -> {
-                    result.addAll(parseUnorderedList(itemNode))
-                }
-
-
-            }
-        }
-        return result
-    }
-
     @Composable
     private fun OrderedListItem(itemNode: ASTNode) {
         val index =
             itemNode.children.find { it.type.name == MarkdownElementTypeNames.LIST_NUMBER }!!
                 .getTextInNode(markdownContent)
         Row(
-            modifier = Modifier
-                .border(1.dp, Color.Blue),
+            modifier = Modifier,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(index.toString())
@@ -758,27 +633,32 @@ class MarkdownParser(private val markdownContent: String) {
         val lang =
             node.findChildByName(MarkdownElementTypeNames.FENCE_LANG)!!
                 .getTextInNode(markdownContent)
-        val content =
-            node.findChildByName(MarkdownElementTypeNames.CODE_FENCE_CONTENT)!!
-                .getTextInNode(markdownContent)
+        val contentList =
+            node.children.filter { it.type.name == MarkdownElementTypeNames.CODE_FENCE_CONTENT }
+                .map { it.getTextInNode(markdownContent) }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.LightGray, RoundedCornerShape(8.dp)),//Color(25, 25, 28)
+                .background(Color(25, 25, 28, 13), RoundedCornerShape(4.dp))
+                .padding(12.dp, 12.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.Start
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Icon(
-                    Icons.Default.ArrowDropDown,
-                    contentDescription = "expand"
-                )
-                Text(lang.toString())
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth(),
+//                verticalAlignment = Alignment.CenterVertically,
+//                horizontalArrangement = Arrangement.SpaceBetween
+//            ) {
+//                Icon(
+//                    Icons.Default.ArrowDropDown,
+//                    contentDescription = "expand"
+//                )
+//                Text(lang.toString())
+//            }
+            contentList.forEach { content ->
+                Text(content.toString())
             }
-            Text(content.toString())
         }
     }
 
