@@ -361,7 +361,8 @@ class MarkdownParser(private val markdownContent: String) {
 
                     MarkdownElementTypes.STRONG -> {
                         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(parseSTRONG(parNode))
+//                            append(parseSTRONG(parNode))
+                            append(parseText(parNode.children.filter { it.type.name != MarkdownElementTypes.EMPH.name }))
                         }
                     }
 
@@ -408,11 +409,12 @@ class MarkdownParser(private val markdownContent: String) {
                                 background = Color(243, 243, 243)
                             )
                         ) {
-                            parNode.children.forEach { node ->
-                                if (node.type.name != MarkdownElementTypeNames.BACKTICK) {
-                                    append(node.getTextInNode(markdownContent))
-                                }
-                            }
+//                            parNode.children.forEach { node ->
+//                                if (node.type.name != MarkdownElementTypeNames.BACKTICK) {
+//                                    append(node.getTextInNode(markdownContent))
+//                                }
+//                            }
+                            append(parseText(parNode))
                         }
                     }
 
