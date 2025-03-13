@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.PlatformSpanStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
@@ -36,7 +36,6 @@ import coil3.compose.SubcomposeAsyncImage
 import com.kmpstudy.markdown.constant.MarkdownElementTypeNames
 import com.kmpstudy.markdown.localstate.LocalImageState
 import com.kmpstudy.markdown.renderer.Table
-import com.kmpstudy.markdown.util.checkNext
 import com.kmpstudy.markdown.util.findChildByName
 import com.kmpstudy.markdown.util.getTableItemNumber
 import com.kmpstudy.markdown.util.hasImage
@@ -365,7 +364,6 @@ class MarkdownParser(private val markdownContent: String) {
 
                     MarkdownElementTypes.STRONG -> {
                         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-//                            append(parseSTRONG(parNode))
                             append(parseText(parNode.children.filter { it.type.name != MarkdownElementTypes.EMPH.name }))
                         }
                     }
@@ -379,10 +377,11 @@ class MarkdownParser(private val markdownContent: String) {
                     }
 
                     MarkdownElementTypes.INLINE_LINK -> {
-                        val linkText =
-                            parNode.findChildOfType(MarkdownElementTypes.LINK_TEXT)!!
-                                .getTextInNode(markdownContent)
-                                .trim { it == '[' || it == ']' }
+//                        val linkText =
+//                            parNode.findChildOfType(MarkdownElementTypes.LINK_TEXT)!!
+//                                .getTextInNode(markdownContent)
+//                                .trim { it == '[' || it == ']' }
+                        val linkTextNode = parNode.findChildOfType(MarkdownElementTypes.LINK_TEXT)!!
                         val linkDestination =
                             parNode.findChildOfType(MarkdownElementTypes.LINK_DESTINATION)!!
                                 .getTextInNode(markdownContent).toString()
@@ -400,7 +399,7 @@ class MarkdownParser(private val markdownContent: String) {
                                 )
                             )
                         )
-                        append(linkText)
+                        append(parseText(linkTextNode.children.filter { it.type.name != "[" && it.type.name != "]" }))
                         if (linkDestination.isUrl()) {
                             append("\u2197")
                         }
@@ -410,15 +409,10 @@ class MarkdownParser(private val markdownContent: String) {
                     MarkdownElementTypes.CODE_SPAN -> {
                         withStyle(
                             style = SpanStyle(
-                                background = Color(243, 243, 243)
+                                background = Color(243, 243, 243),
                             )
                         ) {
-//                            parNode.children.forEach { node ->
-//                                if (node.type.name != MarkdownElementTypeNames.BACKTICK) {
-//                                    append(node.getTextInNode(markdownContent))
-//                                }
-//                            }
-                            append(parseText(parNode))
+                            append(parseText(parNode.children.filter { it.type.name != MarkdownElementTypeNames.BACKTICK }))
                         }
                     }
 
