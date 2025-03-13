@@ -46,6 +46,7 @@ import com.kmpstudy.markdown.util.splitByImage
 import com.kmpstudy.markdown.util.splitList
 import com.kmpstudy.markdown.util.styleByATX
 import com.kmpstudy.markdown.exception.MarkdownParseTableException
+import com.kmpstudy.markdown.renderer.HtmlBlockRenderer
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.findChildOfType
@@ -133,7 +134,10 @@ class MarkdownParser(private val markdownContent: String) {
         Box(
             modifier = Modifier
         ) {
-            Text(node.getTextInNode(markdownContent).toString())
+            val html = node.getTextInNode(markdownContent).toString()
+            val htmlNode = HtmlBlockParser().parseHtml(html)
+            println(htmlNode)
+            HtmlBlockRenderer(htmlNode)
         }
     }
 

@@ -105,6 +105,8 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+
+            implementation("org.jsoup:jsoup:1.19.1")
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -127,6 +129,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
             implementation("io.ktor:ktor-client-java:3.0.3")
 
+            implementation("org.jsoup:jsoup:1.19.1")
         }
     }
 }

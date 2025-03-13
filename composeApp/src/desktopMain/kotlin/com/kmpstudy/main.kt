@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.kmpstudy.markdown.CMPMarkdown
+import com.kmpstudy.markdown.localstate.ImageState
+import com.kmpstudy.markdown.localstate.LocalImageState
 import java.io.File
 
 
@@ -54,7 +57,13 @@ fun main() = application {
                             modifier = Modifier
                                 .fillMaxWidth(0.8f)
                         ) {
-                            CMPMarkdown(markdownContent)
+                            CompositionLocalProvider(
+                                LocalImageState provides ImageState(
+                                    baseUrl = "https://resources.jetbrains.com/help/img/kotlin-multiplatform-dev/"
+                                )
+                            ) {
+                                CMPMarkdown(markdownContent)
+                            }
 //                            MarkdownDocument(
 //                                markdown = markdownContent,
 //                                textStyles = m3TextStyles(),
