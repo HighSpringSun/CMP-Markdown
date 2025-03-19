@@ -1,7 +1,7 @@
 package com.kmpstudy.markdown.parser
 
+import com.kmpstudy.markdown.renderer.HtmlBlockRenderer
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.ParagraphStyle
-import androidx.compose.ui.text.PlatformSpanStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
@@ -45,7 +44,7 @@ import com.kmpstudy.markdown.util.splitByImage
 import com.kmpstudy.markdown.util.splitList
 import com.kmpstudy.markdown.util.styleByATX
 import com.kmpstudy.markdown.exception.MarkdownParseTableException
-import com.kmpstudy.markdown.renderer.HtmlBlockRenderer
+import com.kmpstudy.markdown.renderer.debugHtmlNode
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.findChildOfType
@@ -136,6 +135,8 @@ class MarkdownParser(private val markdownContent: String) {
             val html = node.getTextInNode(markdownContent).toString()
             val htmlNode = HtmlBlockParser().parseHtml(html)
             println(htmlNode)
+            // 打印调试信息
+            println("HTML Struct:\n${debugHtmlNode(htmlNode)}")
             HtmlBlockRenderer(htmlNode)
         }
     }
