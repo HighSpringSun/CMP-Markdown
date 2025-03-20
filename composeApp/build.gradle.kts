@@ -120,14 +120,15 @@ kotlin {
             // markdown
             implementation("org.jetbrains:markdown:0.7.3")
             // coil3
-            implementation("io.coil-kt.coil3:coil-compose:3.0.4")
-            implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.4")
+            implementation("io.coil-kt.coil3:coil-compose:3.1.0")
+            implementation("io.coil-kt.coil3:coil-network-ktor3:3.1.0")
+            implementation("io.coil-kt.coil3:coil-svg:3.1.0")
 
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
-            implementation("io.ktor:ktor-client-java:3.0.3")
+            implementation("io.ktor:ktor-client-java:3.1.0")
 
             implementation("org.jsoup:jsoup:1.19.1")
         }

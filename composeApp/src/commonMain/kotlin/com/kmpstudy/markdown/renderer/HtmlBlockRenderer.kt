@@ -2,28 +2,52 @@ package com.kmpstudy.markdown.renderer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.identityHashCode
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
+import com.kmpstudy.markdown.localstate.LocalImageState
+import com.kmpstudy.markdown.localstate.LocalInlineContent
 import com.kmpstudy.markdown.parser.HtmlNode
+import com.kmpstudy.markdown.util.isUrl
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 
 // 添加一个辅助函数来判断元素是否为内联元素
@@ -49,7 +73,7 @@ private fun isBlockElement(tagName: String): Boolean {
 @Composable
 fun HtmlBlockRenderer(htmlNode: HtmlNode) {
     Column(
-        modifier = Modifier,
+        modifier = Modifier
     ) {
         when (htmlNode) {
             is HtmlNode.Element -> {
@@ -57,6 +81,7 @@ fun HtmlBlockRenderer(htmlNode: HtmlNode) {
                     "tldr" -> {
                         Column(
                             modifier = Modifier
+                                .fillMaxWidth()
                                 .border(1.dp, Color(209, 209, 210), RoundedCornerShape(6.dp))
                                 .padding(8.dp)
                         ) {
@@ -70,7 +95,59 @@ fun HtmlBlockRenderer(htmlNode: HtmlNode) {
                         }
                     }
 
-                    // ... 其他代码保持不变 ...
+                    "table" -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        ) {
+                            // 遍历表格的子节点
+                            htmlNode.children.forEach { childNode ->
+                                when (childNode) {
+                                    is HtmlNode.Element -> {
+                                        when (childNode.tagName) {
+                                            "thead" -> {
+                                                // 处理表头
+                                                renderTableHeader(childNode)
+                                            }
+                                            "tbody" -> {
+                                                // 处理表体
+                                                renderTableBody(childNode)
+                                            }
+                                            else -> {
+                                                // 这里可以处理没有 thead 和 tbody 的情况，直接渲染子节点
+                                                renderTableBody(HtmlNode.Element("tbody", emptyMap(), listOf(childNode)))
+                                            }
+                                        }
+                                    }
+
+                                    is HtmlNode.Text -> {
+                                        println(childNode.content)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    "list" -> {
+                        // 将 <list> 标签当作 <ul> 标签处理
+                        Column(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                        ) {
+                            htmlNode.children.forEach { childNode ->
+                                if (childNode is HtmlNode.Element && childNode.tagName == "li") {
+                                    Row(
+                                        verticalAlignment = Alignment.Top,
+                                        modifier = Modifier.padding(vertical = 2.dp)
+                                    ) {
+                                        Text("• ", fontWeight = FontWeight.Bold)
+                                        Column {
+                                            renderChildrenWithTextMerging(childNode.children)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     "blockquote" -> {
                         Box(
@@ -92,8 +169,6 @@ fun HtmlBlockRenderer(htmlNode: HtmlNode) {
                             }
                         }
                     }
-
-                    // ... 其他代码保持不变 ...
 
                     "ul" -> {
                         Column(
@@ -135,8 +210,6 @@ fun HtmlBlockRenderer(htmlNode: HtmlNode) {
                         }
                     }
 
-                    // ... 其他代码保持不变 ...
-
                     else -> {
                         if (isInlineElement(htmlNode.tagName)) {
                             // 内联元素应该由父元素处理，这里不应该单独渲染
@@ -147,7 +220,6 @@ fun HtmlBlockRenderer(htmlNode: HtmlNode) {
                                 }
                             )
                         } else {
-                            // 未知的块级元素，按默认方式处理
                             Column(
                                 modifier = Modifier
                             ) {
@@ -169,6 +241,7 @@ fun HtmlBlockRenderer(htmlNode: HtmlNode) {
 // 修改渲染子节点的函数
 @Composable
 private fun renderChildrenWithTextMerging(children: List<HtmlNode>) {
+
     // 将子节点分为内联组和块级组
     val groups = mutableListOf<Pair<Boolean, List<HtmlNode>>>() // Boolean表示是否为内联组
     var currentInlineGroup = mutableListOf<HtmlNode>()
@@ -222,7 +295,11 @@ private fun renderChildrenWithTextMerging(children: List<HtmlNode>) {
                     }
                 }
             }
-            Text(text = combinedText)
+            BasicText(
+                text = combinedText,
+                style = MaterialTheme.typography.body1,
+                inlineContent = LocalInlineContent.current
+            )
         } else {
             // 块级元素，直接渲染
             HtmlBlockRenderer(group[0])
@@ -232,10 +309,47 @@ private fun renderChildrenWithTextMerging(children: List<HtmlNode>) {
 
 
 // 添加一个函数来渲染内联元素
+@OptIn(ExperimentalUuidApi::class)
 @Composable
 private fun renderInlineElement(htmlNode: HtmlNode.Element): AnnotatedString {
     return buildAnnotatedString {
         when (htmlNode.tagName) {
+
+            "img" -> {
+
+                val src = htmlNode.attributes["src"] ?: ""
+                val alt = htmlNode.attributes["alt"] ?: ""
+                val width = htmlNode.attributes["width"]?.toIntOrNull()?.dp
+                val height = htmlNode.attributes["height"]?.toIntOrNull()?.dp
+                val baseUrl = LocalImageState.current.baseUrl
+
+                val localInlineContent = LocalInlineContent.current
+                val key = Uuid.random().toHexString()
+                localInlineContent[key] = InlineTextContent(
+                    placeholder = Placeholder(
+                        width = 1.5.em,
+                        height = 1.5.em,
+                        placeholderVerticalAlign = PlaceholderVerticalAlign.Center
+                    ),
+                    children = {
+                        SubcomposeAsyncImage(
+                            model = "$baseUrl$src",
+                            contentDescription = alt,
+                            modifier = Modifier
+                                .widthIn(min = 0.dp, max = width ?: Dp.Infinity)
+                                .heightIn(min = 0.dp, max = height ?: Dp.Infinity),
+                            error = {
+                                Text(
+                                    text = alt,
+                                    color = Color.Red,
+                                    modifier = Modifier
+                                )
+                            }
+                        )
+                    }
+                )
+                appendInlineContent(key, alt)
+            }
 
             "br" -> {
                 append('\n')
@@ -371,13 +485,20 @@ private fun renderInlineElement(htmlNode: HtmlNode.Element): AnnotatedString {
 
             "a" -> {
                 val href = htmlNode.attributes["href"] ?: ""
-                pushStyle(
-                    SpanStyle(
-                        color = MaterialTheme.colors.primary,
-                        textDecoration = TextDecoration.Underline
+                pushLink(
+                    LinkAnnotation.Url(
+                        href,
+                        styles = TextLinkStyles(
+                            style = SpanStyle(
+                                color = Color(48, 127, 255)
+                            ),
+                            hoveredStyle = SpanStyle(
+                                color = Color(48, 127, 255),
+                                textDecoration = TextDecoration.Underline
+                            )
+                        )
                     )
                 )
-                pushStringAnnotation(tag = "URL", annotation = href)
                 htmlNode.children.forEach { child ->
                     if (child is HtmlNode.Text) {
                         append(child.content)
@@ -385,8 +506,10 @@ private fun renderInlineElement(htmlNode: HtmlNode.Element): AnnotatedString {
                         append(renderInlineElement(child))
                     }
                 }
-                pop() // 弹出URL注释
-                pop() // 弹出样式
+                if (href.isUrl()) {
+                    append("\u2197")
+                }
+                pop()
             }
 
             else -> {
@@ -417,6 +540,67 @@ fun debugHtmlNode(node: HtmlNode, indent: String = ""): String {
 
         is HtmlNode.Text -> {
             "${indent}Text(content=\"${node.content}\")\n"
+        }
+    }
+}
+
+// 渲染表头
+@Composable
+private fun renderTableHeader(theadNode: HtmlNode.Element) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.LightGray.copy(alpha = 0.2f))
+            .border(1.dp, Color.LightGray)
+    ) {
+        // 遍历表头的行
+        theadNode.children.forEach { trNode ->
+            if (trNode is HtmlNode.Element && trNode.tagName == "tr") {
+                // 遍历行的单元格
+                trNode.children.forEach { tdNode ->
+                    if (tdNode is HtmlNode.Element && tdNode.tagName == "th") {
+                        Text(
+                            text = buildAnnotatedString {
+                                append(renderInlineElement(tdNode))
+                            },
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .weight(1f)
+                                .border(1.dp, Color.LightGray)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 渲染表体
+@Composable
+private fun renderTableBody(tbodyNode: HtmlNode.Element) {
+    tbodyNode.children.forEach { trNode ->
+        if (trNode is HtmlNode.Element && trNode.tagName == "tr") {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Color.LightGray)
+            ) {
+                // 遍历行的单元格
+                trNode.children.forEach { tdNode ->
+                    if (tdNode is HtmlNode.Element && tdNode.tagName == "td") {
+                        Text(
+                            text = buildAnnotatedString {
+                                append(renderInlineElement(tdNode))
+                            },
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .weight(1f)
+                                .border(1.dp, Color.LightGray)
+                        )
+                    }
+                }
+            }
         }
     }
 }
