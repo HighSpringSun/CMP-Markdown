@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
@@ -18,11 +17,12 @@ import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.identityHashCode
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.Placeholder
@@ -36,15 +36,14 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
 import coil3.compose.SubcomposeAsyncImage
 import com.kmpstudy.markdown.localstate.LocalImageState
 import com.kmpstudy.markdown.localstate.LocalInlineContent
 import com.kmpstudy.markdown.parser.HtmlNode
+import com.kmpstudy.markdown.renderer.style.RightBorderShape
 import com.kmpstudy.markdown.util.isUrl
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -82,7 +81,7 @@ fun HtmlBlockRenderer(htmlNode: HtmlNode) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .border(1.dp, Color(209, 209, 210), RoundedCornerShape(6.dp))
+                                .border(0.5.dp, Color(209, 209, 210), RoundedCornerShape(6.dp))
                                 .padding(8.dp)
                         ) {
                             renderChildrenWithTextMerging(htmlNode.children)
@@ -100,34 +99,67 @@ fun HtmlBlockRenderer(htmlNode: HtmlNode) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp)
+                                .border(0.5.dp, Color.LightGray)
                         ) {
                             // 遍历表格的子节点
+                            var hasHeader = false
+                            var hasBody = false
+
+                            // 先处理表头
                             htmlNode.children.forEach { childNode ->
-                                when (childNode) {
-                                    is HtmlNode.Element -> {
-                                        when (childNode.tagName) {
-                                            "thead" -> {
-                                                // 处理表头
-                                                renderTableHeader(childNode)
-                                            }
-                                            "tbody" -> {
-                                                // 处理表体
-                                                renderTableBody(childNode)
-                                            }
-                                            else -> {
-                                                // 这里可以处理没有 thead 和 tbody 的情况，直接渲染子节点
-                                                renderTableBody(HtmlNode.Element("tbody", emptyMap(), listOf(childNode)))
+                                if (childNode is HtmlNode.Element && childNode.tagName == "thead") {
+                                    renderTableHeader(childNode)
+                                    hasHeader = true
+                                }
+                            }
+
+                            // 再处理表体
+                            htmlNode.children.forEach { childNode ->
+                                if (childNode is HtmlNode.Element) {
+                                    when (childNode.tagName) {
+                                        "tbody" -> {
+                                            renderTableBody(childNode)
+                                            hasBody = true
+                                        }
+
+                                        "tr" -> {
+                                            // 如果直接有tr标签（没有thead和tbody包装）
+                                            if (!hasHeader && !hasBody) {
+                                                // 第一行作为表头
+                                                renderTableHeader(
+                                                    HtmlNode.Element(
+                                                        "thead",
+                                                        emptyMap(),
+                                                        listOf(childNode)
+                                                    )
+                                                )
+                                                hasHeader = true
+                                            } else {
+                                                // 其他行作为表体
+                                                renderTableRow(childNode)
                                             }
                                         }
                                     }
+                                }
+                            }
 
-                                    is HtmlNode.Text -> {
-                                        println(childNode.content)
+                            // 如果没有找到任何表头或表体，尝试处理其他元素
+                            if (!hasHeader && !hasBody) {
+                                htmlNode.children.forEach { childNode ->
+                                    if (childNode is HtmlNode.Element && childNode.tagName != "thead" && childNode.tagName != "tbody") {
+                                        renderTableBody(
+                                            HtmlNode.Element(
+                                                "tbody",
+                                                emptyMap(),
+                                                listOf(childNode)
+                                            )
+                                        )
                                     }
                                 }
                             }
                         }
                     }
+
                     "list" -> {
                         // 将 <list> 标签当作 <ul> 标签处理
                         Column(
@@ -382,8 +414,7 @@ private fun renderInlineElement(htmlNode: HtmlNode.Element): AnnotatedString {
             "code" -> {
                 pushStyle(
                     SpanStyle(
-                        fontFamily = MaterialTheme.typography.body2.fontFamily,
-                        background = MaterialTheme.colors.surface
+                        background = Color(243, 243, 243),
                     )
                 )
                 htmlNode.children.forEach { child ->
@@ -547,30 +578,15 @@ fun debugHtmlNode(node: HtmlNode, indent: String = ""): String {
 // 渲染表头
 @Composable
 private fun renderTableHeader(theadNode: HtmlNode.Element) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.LightGray.copy(alpha = 0.2f))
-            .border(1.dp, Color.LightGray)
+            .background(Color(244, 244, 244))
     ) {
         // 遍历表头的行
         theadNode.children.forEach { trNode ->
             if (trNode is HtmlNode.Element && trNode.tagName == "tr") {
-                // 遍历行的单元格
-                trNode.children.forEach { tdNode ->
-                    if (tdNode is HtmlNode.Element && tdNode.tagName == "th") {
-                        Text(
-                            text = buildAnnotatedString {
-                                append(renderInlineElement(tdNode))
-                            },
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .weight(1f)
-                                .border(1.dp, Color.LightGray)
-                        )
-                    }
-                }
+                renderTableRow(trNode, isHeader = true)
             }
         }
     }
@@ -579,27 +595,151 @@ private fun renderTableHeader(theadNode: HtmlNode.Element) {
 // 渲染表体
 @Composable
 private fun renderTableBody(tbodyNode: HtmlNode.Element) {
-    tbodyNode.children.forEach { trNode ->
-        if (trNode is HtmlNode.Element && trNode.tagName == "tr") {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, Color.LightGray)
-            ) {
-                // 遍历行的单元格
-                trNode.children.forEach { tdNode ->
-                    if (tdNode is HtmlNode.Element && tdNode.tagName == "td") {
-                        Text(
-                            text = buildAnnotatedString {
-                                append(renderInlineElement(tdNode))
-                            },
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .weight(1f)
-                                .border(1.dp, Color.LightGray)
-                        )
-                    }
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        tbodyNode.children.forEach { trNode ->
+            if (trNode is HtmlNode.Element && trNode.tagName == "tr") {
+                renderTableRow(trNode)
+            }
+        }
+    }
+}
+
+// 渲染表格行
+@Composable
+private fun renderTableRow(trNode: HtmlNode.Element, isHeader: Boolean = false) {
+    // 使用SubcomposeLayout来确保所有单元格高度一致
+    SubcomposeLayout(
+        modifier = Modifier.fillMaxWidth()
+            .border(0.5.dp, Color.LightGray)
+    ) { constraints ->
+        // 过滤出所有单元格节点
+        val cellNodes = trNode.children.filterIsInstance<HtmlNode.Element>()
+            .filter { it.tagName == "td" || it.tagName == "th" }
+
+        // 计算每个单元格的权重
+        val weights = cellNodes.map {
+            val colspan = it.attributes["colspan"]?.toIntOrNull() ?: 1
+            colspan.toFloat()
+        }
+        val totalWeight = weights.sum()
+
+        // 第一次测量：获取所有单元格的高度
+        val placeables = cellNodes.mapIndexed { index, cellNode ->
+            val cellWeight = weights[index]
+            val cellWidth = ((constraints.maxWidth * cellWeight) / totalWeight).toInt()
+
+            // 测量单元格内容
+            subcompose(index) {
+                CellContent(
+                    cellNode = cellNode,
+                    isHeader = isHeader,
+                    isLastCell = index == cellNodes.size - 1
+                )
+            }.first().measure(
+                constraints.copy(
+                    minWidth = cellWidth,
+                    maxWidth = cellWidth,
+                    minHeight = 0
+                )
+            )
+        }
+
+        // 找出最大高度
+        val maxHeight = placeables.maxOf { it.height }
+
+        // 第二次测量：使用统一的高度
+        val finalPlaceables = cellNodes.mapIndexed { index, cellNode ->
+            val cellWeight = weights[index]
+            val cellWidth = ((constraints.maxWidth * cellWeight) / totalWeight).toInt()
+
+            subcompose(index + cellNodes.size) {
+                CellContent(
+                    cellNode = cellNode,
+                    isHeader = isHeader,
+                    isLastCell = index == cellNodes.size - 1,
+                    fixedHeight = maxHeight
+                )
+            }.first().measure(
+                constraints.copy(
+                    minWidth = cellWidth,
+                    maxWidth = cellWidth,
+                    minHeight = maxHeight,
+                    maxHeight = maxHeight
+                )
+            )
+        }
+
+        // 放置所有单元格
+        layout(constraints.maxWidth, maxHeight) {
+            var xPosition = 0
+            finalPlaceables.forEachIndexed { index, placeable ->
+                placeable.place(xPosition, 0)
+                xPosition += placeable.width
+            }
+        }
+    }
+}
+
+// 单元格内容组件
+@Composable
+private fun CellContent(
+    cellNode: HtmlNode.Element,
+    isHeader: Boolean,
+    isLastCell: Boolean,
+    fixedHeight: Int? = null
+) {
+    Box(
+        modifier = Modifier
+            .then(
+                if (fixedHeight != null) {
+                    Modifier.height(fixedHeight.dp)
+                } else {
+                    Modifier
                 }
+            )
+            .then(
+                if (!isLastCell && !(isHeader || cellNode.tagName == "th")) {
+                    Modifier.border(
+                        0.5.dp,
+                        Color(209, 209, 210),
+                        RightBorderShape(0.5.dp)
+                    )
+                } else {
+                    Modifier
+                }
+            )
+            .then(
+                if (isHeader || cellNode.tagName == "th") {
+                    Modifier
+                        .border(0.5.dp, Color(209, 209, 210))
+                        .background(Color(244, 244, 244))
+                } else {
+                    Modifier
+                }
+            )
+            .padding(12.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        if (isHeader || cellNode.tagName == "th") {
+            // 表头单元格
+            Text(
+                text = buildAnnotatedString {
+                    cellNode.children.forEach { child ->
+                        when (child) {
+                            is HtmlNode.Text -> append(child.content)
+                            is HtmlNode.Element -> append(renderInlineElement(child))
+                        }
+                    }
+                },
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(6.dp)
+            )
+        } else {
+            // 普通单元格
+            Column {
+                renderChildrenWithTextMerging(cellNode.children)
             }
         }
     }
