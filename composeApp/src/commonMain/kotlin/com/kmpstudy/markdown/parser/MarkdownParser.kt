@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextDecoration
@@ -391,6 +393,12 @@ class MarkdownParser(private val markdownContent: String) {
                         }
                     }
 
+                    MarkdownElementTypes.EMPH -> {
+                        withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                            append(parseText(parNode.children.filter { it.type.name != MarkdownElementTypes.EMPH.name }))
+                        }
+                    }
+
                     MarkdownElementTypes.IMAGE -> {
 //                        throw UnsupportedOperationException("IMAGE")
                     }
@@ -435,7 +443,7 @@ class MarkdownParser(private val markdownContent: String) {
                         val code =
                             parseText(parNode.children.filter { it.type.name != MarkdownElementTypeNames.BACKTICK })
                         val size = textMeasurer.measure(code, MaterialTheme.typography.body1).size
-                        val width = with(LocalDensity.current) { size.width / density }
+                        val width = with(LocalDensity.current) { size.width / density } + 12
                         val height = with(LocalDensity.current) { size.height / density }
                         val localInlineContent = LocalInlineContent.current
                         val key = Uuid.random().toHexString()
@@ -448,25 +456,17 @@ class MarkdownParser(private val markdownContent: String) {
                             children = {
                                 Box(
                                     modifier = Modifier
-                                        .background(Color(243, 243, 243), RoundedCornerShape(6.dp))
-                                        .padding(1.dp),
+                                        .background(Color(243, 243, 243), RoundedCornerShape(6.dp)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     BasicText(
-                                        text = parseText(parNode.children.filter { it.type.name != MarkdownElementTypeNames.BACKTICK }),
-                                        style = MaterialTheme.typography.body1
+                                        text = " $code ",
+                                        style = MaterialTheme.typography.body1,
                                     )
                                 }
                             }
                         )
-                        appendInlineContent(key)
-//                        withStyle(
-//                            style = SpanStyle(
-//                                background = Color(243, 243, 243),
-//                            )
-//                        ) {
-//                            append(parseText(parNode.children.filter { it.type.name != MarkdownElementTypeNames.BACKTICK }))
-//                        }
+                        appendInlineContent(key, code.toString())
                     }
 
                     MarkdownElementTypes.CODE_FENCE -> {
