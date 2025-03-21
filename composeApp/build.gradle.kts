@@ -17,7 +17,7 @@ plugins {
 
 
 group = "com.kmpstudy" // 替换为你的 Group ID
-version = "0.4.0" // 版本号
+version = "0.5.0" // 版本号
 val artifactId = "cmp-markdown"
 
 
