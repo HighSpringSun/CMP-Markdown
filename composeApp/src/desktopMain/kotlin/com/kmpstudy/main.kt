@@ -1,11 +1,17 @@
 package com.kmpstudy
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Typography
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,46 +19,98 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-//import com.kmpstudy.composeapp.generated.resources.MapleMono_NF_CN_Regular
-import com.kmpstudy.composeapp.generated.resources.Res
-import com.kmpstudy.markdown.parser.MarkdownParser
-import org.jetbrains.compose.resources.ExperimentalResourceApi
+import com.kmpstudy.markdown.CMPMarkdown
+import com.kmpstudy.markdown.localstate.ImageState
+import com.kmpstudy.markdown.localstate.LocalImageState
+import java.io.File
 
-@OptIn(ExperimentalResourceApi::class)
+
 fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "CMP-Markdown",
     ) {
-        MaterialTheme{
+        MaterialTheme {
             var markdownContent by remember { mutableStateOf("") }
             LaunchedEffect(Unit) {
-//                val file = "supported-platforms-zh-cn" //-zh-cn
-//                val file = "faq-zh-cn"
-                val file = "kotlin-multiplatform-roadmap"
-                val markdown =
-                    Res.readBytes("files/$file.md").decodeToString().replace("\r\n", "\n")
-//                println(markdown)
+                val filePath= "/Users/apple/Desktop/markdown/en/multiplatform-onboard/multiplatform-dependencies.md"
+//                val filePath = "C:\\Users\\cygao\\Desktop\\test.txt"
+//                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\case-studies.md"
+//                val filePath = "C:\\Users\\cygao\\Desktop\\supported-platforms-zh-cn.md"
+//                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\multiplatform-setup.md"
+//                val filePath = "C:\\Users\\cygao\\Desktop\\kotlin-multiplatform-roadmap.md"
+//                val filePath = "C:\\Users\\cygao\\Desktop\\multiplatform-upgrade-app.md"
+//                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\multiplatform-onboard\\multiplatform-dependencies.md"
+//                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\multiplatform-onboard\\multiplatform-wrap-up.md"
+//                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\multiplatform-onboard\\multiplatform-upgrade-app.md"
+                val markdown = File(filePath).readText().replace("\r\n", "\n")
                 markdownContent = markdown
             }
             if (markdownContent.isNotEmpty()) {
-                val parser = remember { MarkdownParser(markdownContent) }
-                Box(
-                    contentAlignment = Alignment.TopCenter
-                ) {
-                    SelectionContainer {
-                        Column(
+//                val parser = remember { MarkdownParser(markdownContent) }
+                SelectionContainer {
+                    VerticalScrollBox(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .fillMaxWidth(0.8f)
                         ) {
-                            parser.parse().invoke()
+                            CompositionLocalProvider(
+                                LocalImageState provides ImageState(
+                                    baseUrl = "https://resources.jetbrains.com/help/img/kotlin-multiplatform-dev/"
+                                )
+                            ) {
+                                CMPMarkdown(markdownContent)
+                            }
+//                            MarkdownDocument(
+//                                markdown = markdownContent,
+//                                textStyles = m3TextStyles(),
+//                                textStyleModifiers = m3TextStyleModifiers(),
+//                                blockQuoteStyle = m3BlockQuoteStyle(),
+//                                codeBlockStyle = m3CodeBlockStyle(),
+//                                ruleStyle = m3RuleStyle(),
+//                                tableStyle = m3TableStyle(),
+//                                onLinkClick = {}
+//                            )
                         }
+//                        parser.parse(enableASTInfo = true).invoke()
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun VerticalScrollBox(
+    modifier: Modifier = Modifier,
+    contentAlignment: Alignment = Alignment.TopStart,
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = contentAlignment
+    ) {
+        val state = rememberScrollState()
+
+        // 可滚动的容器
+        Box(
+            modifier = Modifier
+                .verticalScroll(state) // 关联滚动状态
+        ) {
+            content() // 内容
+        }
+        VerticalScrollbar(
+            adapter = rememberScrollbarAdapter(state),
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .width(6.dp)
+        )
     }
 }
