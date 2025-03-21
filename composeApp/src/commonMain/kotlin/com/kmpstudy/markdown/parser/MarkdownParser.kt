@@ -9,9 +9,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -21,17 +26,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import coil3.compose.SubcomposeAsyncImage
 import com.kmpstudy.markdown.constant.MarkdownElementTypeNames
@@ -46,6 +57,7 @@ import com.kmpstudy.markdown.util.splitByImage
 import com.kmpstudy.markdown.util.splitList
 import com.kmpstudy.markdown.util.styleByATX
 import com.kmpstudy.markdown.exception.MarkdownParseTableException
+import com.kmpstudy.markdown.localstate.LocalInlineContent
 import com.kmpstudy.markdown.renderer.debugHtmlNode
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
@@ -53,6 +65,8 @@ import org.intellij.markdown.ast.findChildOfType
 import org.intellij.markdown.ast.getTextInNode
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.intellij.markdown.parser.MarkdownParser
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 
 data class MarkdownTableState(
@@ -174,14 +188,18 @@ class MarkdownParser(private val markdownContent: String) {
                     Image(nodes.first())
                 } else {
                     val annotatedString = parseText(nodes)
-                    Text(
-                        annotatedString,
+                    BasicText(
+                        text = annotatedString,
+                        style = MaterialTheme.typography.body1,
+                        inlineContent = LocalInlineContent.current
                     )
                 }
             }
         } else {
-            Text(
-                parseText(node)
+            BasicText(
+                text = parseText(node),
+                style = MaterialTheme.typography.body1,
+                inlineContent = LocalInlineContent.current
             )
         }
     }
@@ -357,6 +375,8 @@ class MarkdownParser(private val markdownContent: String) {
         )
     }
 
+    @OptIn(ExperimentalUuidApi::class)
+    @Composable
     private fun parseText(nodes: List<ASTNode>): AnnotatedString {
         val annotatedString = buildAnnotatedString {
             var i = 0
@@ -410,13 +430,43 @@ class MarkdownParser(private val markdownContent: String) {
                     }
 
                     MarkdownElementTypes.CODE_SPAN -> {
-                        withStyle(
-                            style = SpanStyle(
-                                background = Color(243, 243, 243),
-                            )
-                        ) {
-                            append(parseText(parNode.children.filter { it.type.name != MarkdownElementTypeNames.BACKTICK }))
-                        }
+                        val textMeasurer = rememberTextMeasurer()
+
+                        val code =
+                            parseText(parNode.children.filter { it.type.name != MarkdownElementTypeNames.BACKTICK })
+                        val size = textMeasurer.measure(code, MaterialTheme.typography.body1).size
+                        val width = with(LocalDensity.current) { size.width / density }
+                        val height = with(LocalDensity.current) { size.height / density }
+                        val localInlineContent = LocalInlineContent.current
+                        val key = Uuid.random().toHexString()
+                        localInlineContent[key] = InlineTextContent(
+                            placeholder = Placeholder(
+                                width = width.sp,
+                                height = height.sp,
+                                placeholderVerticalAlign = PlaceholderVerticalAlign.Center
+                            ),
+                            children = {
+                                Box(
+                                    modifier = Modifier
+                                        .background(Color(243, 243, 243), RoundedCornerShape(6.dp))
+                                        .padding(1.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    BasicText(
+                                        text = parseText(parNode.children.filter { it.type.name != MarkdownElementTypeNames.BACKTICK }),
+                                        style = MaterialTheme.typography.body1
+                                    )
+                                }
+                            }
+                        )
+                        appendInlineContent(key)
+//                        withStyle(
+//                            style = SpanStyle(
+//                                background = Color(243, 243, 243),
+//                            )
+//                        ) {
+//                            append(parseText(parNode.children.filter { it.type.name != MarkdownElementTypeNames.BACKTICK }))
+//                        }
                     }
 
                     MarkdownElementTypes.CODE_FENCE -> {
@@ -457,6 +507,7 @@ class MarkdownParser(private val markdownContent: String) {
         return annotatedString
     }
 
+    @Composable
     private fun parseText(node: ASTNode): AnnotatedString {
         return parseText(node.children)
     }
@@ -509,27 +560,24 @@ class MarkdownParser(private val markdownContent: String) {
         }
     }
 
+    @Composable
     private fun parseListItem(itemNode: ASTNode, level: Int = 0): AnnotatedString {
         return buildAnnotatedString {
             itemNode.children.forEach { node ->
                 when (node.type) {
                     MarkdownElementTypes.PARAGRAPH -> {
-                        append(
-                            buildAnnotatedString {
-                                withStyle(
-                                    style = ParagraphStyle(
-                                        textIndent = TextIndent(
-                                            firstLine = 0.sp,
-                                            restLine = 20.sp
-                                        )
-                                    )
-                                ) {
-                                    append("   ".repeat(level))
-                                    append("\u2022  ")
-                                    append(parseText(node))
-                                }
-                            }
+                        pushStyle(
+                            style = ParagraphStyle(
+                                textIndent = TextIndent(
+                                    firstLine = 0.sp,
+                                    restLine = 20.sp
+                                )
+                            )
                         )
+                        append("   ".repeat(level))
+                        append("\u2022  ")
+                        append(parseText(node))
+                        pop()
                     }
 
                     MarkdownElementTypes.UNORDERED_LIST -> {
@@ -555,6 +603,7 @@ class MarkdownParser(private val markdownContent: String) {
         }
     }
 
+    @Composable
     private fun parseUnorderedList(
         node: ASTNode,
         level: Int = 0,
@@ -573,6 +622,7 @@ class MarkdownParser(private val markdownContent: String) {
     }
 
 
+    @Composable
     private fun parseOrderedListItem(
         itemNode: ASTNode,
         level: Int = 0,
@@ -584,24 +634,20 @@ class MarkdownParser(private val markdownContent: String) {
                 if (node.type.name == MarkdownElementTypeNames.LIST_NUMBER) {
                     index = node.getTextInNode(markdownContent)
                 } else if (node.type == MarkdownElementTypes.PARAGRAPH) {
-                    append(
-                        buildAnnotatedString {
-                            withStyle(
-                                style = ParagraphStyle(
-                                    textIndent = TextIndent(firstLine = 0.sp, restLine = 20.sp)
-                                )
-                            ) {
-                                append("   ".repeat(level))
-                                if (!consumed) {
-                                    append("$index ")
-                                    consumed = true
-                                } else {
-                                    append("    ")
-                                }
-                                append(parseText(node))
-                            }
-                        }
+                    pushStyle(
+                        style = ParagraphStyle(
+                            textIndent = TextIndent(firstLine = 0.sp, restLine = 20.sp)
+                        )
                     )
+                    append("   ".repeat(level))
+                    if (!consumed) {
+                        append("$index ")
+                        consumed = true
+                    } else {
+                        append("    ")
+                    }
+                    append(parseText(node))
+                    pop()
                 } else if (node.type == MarkdownElementTypes.UNORDERED_LIST) {
                     parseUnorderedList(node, level + 1).forEach {
                         append(it)
@@ -615,6 +661,7 @@ class MarkdownParser(private val markdownContent: String) {
         }
     }
 
+    @Composable
     private fun parseOrderedList(
         node: ASTNode,
         level: Int = 0

@@ -9,6 +9,3 @@ val LocalInlineContent = compositionLocalOf {
 }
 
 
-//class InlineContent {
-//
-//}
