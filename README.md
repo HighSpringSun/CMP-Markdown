@@ -12,7 +12,7 @@ Add the dependency below to your **module**'s `build.gradle.kts` file:
 sourceSets {
     val commonMain by getting {
         dependencies {
-            implementation("com.kmpstudy:cmp-markdown:0.5.0")
+            implementation("com.kmpstudy:cmp-markdown:0.5.1")
         }
     }
 }
@@ -24,5 +24,5 @@ sourceSets {
    val markdownContent = """
       ## Download
    """.trimIndent()
-   MarkdownParser(markdownContent).parse().invoke()
+   CMPMarkdown(markdownContent)
 ```
