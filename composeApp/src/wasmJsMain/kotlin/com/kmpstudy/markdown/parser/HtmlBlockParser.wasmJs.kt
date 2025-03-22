@@ -8,7 +8,7 @@ import org.w3c.dom.parsing.DOMParser
 actual class HtmlBlockParser {
     actual fun parseHtml(html: String): HtmlNode {
         val parser = DOMParser()
-        val document = parser.parseFromString(html, "text/html".toJsReference())
+        val document = parser.parseFromString(html, "text/html".toJsString())
         return convertDomToHtmlNode(document.body!!.firstChild as HTMLElement)
     }
 

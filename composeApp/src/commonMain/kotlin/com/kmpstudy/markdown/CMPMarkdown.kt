@@ -6,11 +6,15 @@ import com.kmpstudy.markdown.parser.MarkdownParser
 
 
 @Composable
-fun CMPMarkdown(markdownContent: String, modifier: Modifier = Modifier) {
+fun CMPMarkdown(
+    markdownContent: String,
+    modifier: Modifier = Modifier,
+    enableASTInfo: Boolean = false
+) {
     val parser = MarkdownParser(markdownContent)
     parser.Markdown(
         modifier = modifier,
-        enableASTInfo = true
+        enableASTInfo = enableASTInfo
     )
 }
 
