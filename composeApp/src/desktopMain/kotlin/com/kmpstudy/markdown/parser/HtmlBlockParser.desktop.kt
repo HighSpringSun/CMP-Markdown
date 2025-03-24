@@ -3,7 +3,11 @@ package com.kmpstudy.markdown.parser
 actual class HtmlBlockParser {
     actual fun parseHtml(html: String): HtmlNode {
         val fragment = org.jsoup.Jsoup.parseBodyFragment(html)
-        return convertJsoupToHtmlNode(fragment.body().child(0))
+        return if (fragment.body().children().isNotEmpty()) {
+            convertJsoupToHtmlNode(fragment.body().child(0))
+        } else {
+            HtmlNode.Text("")
+        }
     }
 
     private fun convertJsoupToHtmlNode(element: org.jsoup.nodes.Element?): HtmlNode {

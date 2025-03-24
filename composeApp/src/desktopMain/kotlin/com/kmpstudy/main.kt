@@ -38,12 +38,12 @@ fun main() = application {
             LaunchedEffect(Unit) {
 //                val filePath= "/Users/apple/Desktop/markdown/en/multiplatform-onboard/multiplatform-dependencies.md"
 //                val filePath = "C:\\Users\\cygao\\Desktop\\test.txt"
-//                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\case-studies.md"
+                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\faq.md"
 //                val filePath = "C:\\Users\\cygao\\Desktop\\supported-platforms-zh-cn.md"
 //                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\multiplatform-setup.md"
 //                val filePath = "C:\\Users\\cygao\\Desktop\\kotlin-multiplatform-roadmap.md"
 //                val filePath = "C:\\Users\\cygao\\Desktop\\multiplatform-upgrade-app.md"
-                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\multiplatform-onboard\\multiplatform-dependencies.md"
+//                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\multiplatform-onboard\\multiplatform-dependencies.md"
 //                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\multiplatform-onboard\\multiplatform-wrap-up.md"
 //                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\multiplatform-onboard\\multiplatform-upgrade-app.md"
                 val markdown = File(filePath).readText().replace("\r\n", "\n")

@@ -9,9 +9,12 @@ actual class HtmlBlockParser {
     actual fun parseHtml(html: String): HtmlNode {
         val parser = DOMParser()
         val document = parser.parseFromString(html, "text/html".toJsString())
-        return convertDomToHtmlNode(document.body!!.firstChild as HTMLElement)
+        return if (document.body!!.children.asList().isNotEmpty()) {
+            convertDomToHtmlNode(document.body!!.firstChild as HTMLElement)
+        } else {
+            HtmlNode.Text("")
+        }
     }
-
 
     private fun convertDomToHtmlNode(element: HTMLElement): HtmlNode.Element {
         val tagName = element.tagName.lowercase()
