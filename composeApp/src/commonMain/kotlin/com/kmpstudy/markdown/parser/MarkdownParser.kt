@@ -14,11 +14,12 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -88,16 +90,19 @@ class MarkdownParser(private val markdownContent: String) {
     @Composable
     fun Markdown(
         modifier: Modifier = Modifier,
+        textStyle: TextStyle = TextStyle.Default,
         enableASTInfo: Boolean = false
     ) {
         if (enableASTInfo) {
             printAstTree(parsedTree, markdownContent)
         }
-        Column(
-            modifier = modifier,
-        ) {
-            parsedTree.children.forEach { node ->
-                MarkdownNode(node)
+        CompositionLocalProvider(LocalTextStyle provides textStyle) {
+            Column(
+                modifier = modifier,
+            ) {
+                parsedTree.children.forEach { node ->
+                    MarkdownNode(node)
+                }
             }
         }
     }
@@ -185,7 +190,7 @@ class MarkdownParser(private val markdownContent: String) {
                     val annotatedString = parseText(nodes)
                     BasicText(
                         text = annotatedString,
-                        style = MaterialTheme.typography.body1,
+                        style = LocalTextStyle.current,
                         inlineContent = LocalInlineContent.current
                     )
                 }
@@ -193,7 +198,7 @@ class MarkdownParser(private val markdownContent: String) {
         } else {
             BasicText(
                 text = parseText(node),
-                style = MaterialTheme.typography.body1,
+                style = LocalTextStyle.current,
                 inlineContent = LocalInlineContent.current
             )
         }
@@ -435,7 +440,7 @@ class MarkdownParser(private val markdownContent: String) {
 
                         val code =
                             parseText(parNode.children.filter { it.type.name != MarkdownElementTypeNames.BACKTICK })
-                        val size = textMeasurer.measure(code, MaterialTheme.typography.body1).size
+                        val size = textMeasurer.measure(code, LocalTextStyle.current).size
                         val width = with(LocalDensity.current) { size.width / density } + 12
                         val height = with(LocalDensity.current) { size.height / density }
                         val localInlineContent = LocalInlineContent.current
@@ -454,7 +459,7 @@ class MarkdownParser(private val markdownContent: String) {
                                 ) {
                                     BasicText(
                                         text = " $code ",
-                                        style = MaterialTheme.typography.body1,
+                                        style = LocalTextStyle.current,
                                     )
                                 }
                             }

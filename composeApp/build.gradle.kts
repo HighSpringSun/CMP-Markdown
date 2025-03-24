@@ -12,12 +12,11 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.mavenPublishing)
-//    id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
 
 group = "com.kmpstudy" // 替换为你的 Group ID
-version = "0.5.2" // 版本号
+version = "0.5.3" // 版本号
 val artifactId = "cmp-markdown"
 
 
