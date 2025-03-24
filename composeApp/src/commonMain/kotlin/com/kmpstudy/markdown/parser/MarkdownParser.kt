@@ -1,6 +1,5 @@
 package com.kmpstudy.markdown.parser
 
-import com.kmpstudy.markdown.renderer.HtmlBlockRenderer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,11 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
@@ -42,14 +37,16 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import coil3.compose.SubcomposeAsyncImage
 import com.kmpstudy.markdown.constant.MarkdownElementTypeNames
+import com.kmpstudy.markdown.exception.MarkdownParseTableException
 import com.kmpstudy.markdown.localstate.LocalImageState
+import com.kmpstudy.markdown.localstate.LocalInlineContent
+import com.kmpstudy.markdown.renderer.HtmlBlockRenderer
 import com.kmpstudy.markdown.renderer.Table
+import com.kmpstudy.markdown.renderer.debugHtmlNode
 import com.kmpstudy.markdown.util.findChildByName
 import com.kmpstudy.markdown.util.getTableItemNumber
 import com.kmpstudy.markdown.util.hasImage
@@ -58,9 +55,6 @@ import com.kmpstudy.markdown.util.isUrl
 import com.kmpstudy.markdown.util.splitByImage
 import com.kmpstudy.markdown.util.splitList
 import com.kmpstudy.markdown.util.styleByATX
-import com.kmpstudy.markdown.exception.MarkdownParseTableException
-import com.kmpstudy.markdown.localstate.LocalInlineContent
-import com.kmpstudy.markdown.renderer.debugHtmlNode
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.findChildOfType
@@ -152,7 +146,6 @@ class MarkdownParser(private val markdownContent: String) {
         ) {
             val html = node.getTextInNode(markdownContent).toString()
             val htmlNode = HtmlBlockParser().parseHtml(html)
-            println(htmlNode)
             // 打印调试信息
             println("HTML Struct:\n${debugHtmlNode(htmlNode)}")
             HtmlBlockRenderer(htmlNode)
@@ -712,15 +705,15 @@ class MarkdownParser(private val markdownContent: String) {
         }
     }
 
-    private fun parseSTRONG(node: ASTNode): AnnotatedString = buildAnnotatedString {
-        require(node.type == MarkdownElementTypes.STRONG)
-        node.children.forEach { childNode ->
-            // todo  一个非常奇怪的问题，不能使用type比较因为一直不相等，所以只能用name先比较
-            if (childNode.type.name != MarkdownElementTypes.EMPH.name) {
-                append(childNode.getTextInNode(markdownContent))
-            }
-        }
-    }
+//    private fun parseSTRONG(node: ASTNode): AnnotatedString = buildAnnotatedString {
+//        require(node.type == MarkdownElementTypes.STRONG)
+//        node.children.forEach { childNode ->
+//            // todo1  一个非常奇怪的问题，不能使用type比较因为一直不相等，所以只能用name先比较
+//            if (childNode.type.name != MarkdownElementTypes.EMPH.name) {
+//                append(childNode.getTextInNode(markdownContent))
+//            }
+//        }
+//    }
 
     private fun printAstTree(node: ASTNode, markdownText: String, indent: String = "") {
         val nodeInfo = buildString {

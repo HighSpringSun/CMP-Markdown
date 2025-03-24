@@ -17,7 +17,7 @@ plugins {
 
 
 group = "com.kmpstudy" // 替换为你的 Group ID
-version = "0.5.1" // 版本号
+version = "0.5.2" // 版本号
 val artifactId = "cmp-markdown"
 
 
@@ -103,8 +103,8 @@ kotlin {
         val desktopMain by getting
 
         androidMain.dependencies {
-            implementation(compose.preview)
-            implementation(libs.androidx.activity.compose)
+//            implementation(compose.preview)
+//            implementation(libs.androidx.activity.compose)
 
             implementation("org.jsoup:jsoup:1.19.1")
         }
@@ -113,10 +113,10 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material)
             implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.runtime.compose)
+//            implementation(compose.components.resources)
+//            implementation(compose.components.uiToolingPreview)
+//            implementation(libs.androidx.lifecycle.viewmodel)
+//            implementation(libs.androidx.lifecycle.runtime.compose)
             // markdown
             implementation("org.jetbrains:markdown:0.7.3")
             // coil3
@@ -127,7 +127,7 @@ kotlin {
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutines.swing)
+//            implementation(libs.kotlinx.coroutines.swing)
             implementation("io.ktor:ktor-client-java:3.1.0")
 
             implementation("org.jsoup:jsoup:1.19.1")

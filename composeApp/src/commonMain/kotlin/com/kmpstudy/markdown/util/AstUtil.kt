@@ -5,14 +5,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-//import com.mywf.ui.page.documentspage.logger
 import org.intellij.markdown.MarkdownElementTypes
+import org.intellij.markdown.MarkdownParsingException
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.ast.getTextInNode
 
@@ -118,35 +116,6 @@ fun splitByImage(nodes: List<ASTNode>): List<List<ASTNode>> {
 }
 
 
-fun List<ASTNode>.getTableHeaders(markdownText: String): List<AnnotatedString> {
-    val result = mutableListOf<AnnotatedString>()
-    val separator = "|"
-    var i = 0
-    while (i < size) {
-        val node = this[i]
-        if (node.getTextInNode(markdownText) == separator) {
-            val header = buildAnnotatedString {
-                var j = i + 1
-                while (j < size) {
-                    val content = this@getTableHeaders[j].getTextInNode(markdownText)
-                    if (content == separator) {
-                        i = j
-                    } else {
-//                        logger.info { "content:${content}" }
-                        println("content:${content}")
-                        append(content)
-                    }
-                    j++
-                }
-            }
-            result.add(header)
-        }
-        i++
-    }
-    return result
-}
-
-
 fun parseStyleString(input: CharSequence): Pair<String, String>? {
     val regex = Regex("""^\{\s*(\w+)\s*=\s*"([^"]*)"\s*\}$""")
     return regex.matchEntire(input)?.destructured?.let { (key, value) ->
@@ -155,6 +124,7 @@ fun parseStyleString(input: CharSequence): Pair<String, String>? {
 }
 
 
+@Suppress("unused")
 fun ASTNode.checkNext(markdownContent: String): Modifier {
     require(type == MarkdownElementTypes.PARAGRAPH) { type }
     val pair = parseStyleString(getTextInNode(markdownContent))
@@ -219,7 +189,7 @@ fun ASTNode.styleByATX(): TextStyle {
             }
 
             else -> {
-                throw Exception("node is not ATX")
+                throw MarkdownParsingException("node is not ATX")
             }
         }
     )
