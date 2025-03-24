@@ -16,7 +16,7 @@ plugins {
 
 
 group = "com.kmpstudy" // 替换为你的 Group ID
-version = "0.5.3" // 版本号
+version = "0.5.4" // 版本号
 val artifactId = "cmp-markdown"
 
 
@@ -58,7 +58,6 @@ mavenPublishing {
 
 kotlin {
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
