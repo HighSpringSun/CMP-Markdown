@@ -131,6 +131,14 @@ kotlin {
             implementation("org.jsoup:jsoup:1.19.1")
         }
     }
+
+    targets.configureEach {
+        compilations.configureEach {
+            compileTaskProvider.get().compilerOptions {
+                freeCompilerArgs.add("-Xexpect-actual-classes")
+            }
+        }
+    }
 }
 
 android {
