@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
@@ -152,7 +153,7 @@ class MarkdownParser(private val markdownContent: String) {
             val html = node.getTextInNode(markdownContent).toString()
             val htmlNode = HtmlBlockParser().parseHtml(html)
             // 打印调试信息
-            println("HTML Struct:\n${debugHtmlNode(htmlNode)}")
+//            println("HTML Struct:\n${debugHtmlNode(htmlNode)}")
             HtmlBlockRenderer(htmlNode)
         }
     }
@@ -364,6 +365,9 @@ class MarkdownParser(private val markdownContent: String) {
             contentDescription = imageState.linkText,
             modifier = modifier
                 .padding(bottom = 24.dp),
+            loading = {
+                CircularProgressIndicator(color = Color.Black, strokeWidth = 2.dp)
+            },
             error = {
                 Text(
                     text = imageState.linkText,
@@ -678,9 +682,9 @@ class MarkdownParser(private val markdownContent: String) {
 
     @Composable
     private fun CodeFence(node: ASTNode) {
-        val lang =
-            node.findChildByName(MarkdownElementTypeNames.FENCE_LANG)!!
-                .getTextInNode(markdownContent)
+//        val lang =
+//            node.findChildByName(MarkdownElementTypeNames.FENCE_LANG)!!
+//                .getTextInNode(markdownContent)
         val contentList =
             node.children.filter { it.type.name == MarkdownElementTypeNames.CODE_FENCE_CONTENT }
                 .map { it.getTextInNode(markdownContent) }

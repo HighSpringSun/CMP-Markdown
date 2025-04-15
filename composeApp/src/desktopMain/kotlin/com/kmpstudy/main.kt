@@ -27,6 +27,16 @@ import com.kmpstudy.markdown.localstate.ImageState
 import com.kmpstudy.markdown.localstate.LocalImageState
 import java.io.File
 
+//fun main() = application {
+//    Window(
+//        onCloseRequest = ::exitApplication,
+//        title = "CMP-Markdown",
+//    ) {
+//        val markdownContent = "<!-- If you're interested in having this functionality expanded to a shared module, please vote for this issue in Youtrack and describe your use case. -->"
+//        CMPMarkdown(markdownContent)
+//    }
+//}
+
 
 fun main() = application {
     Window(
@@ -38,7 +48,8 @@ fun main() = application {
             LaunchedEffect(Unit) {
 //                val filePath= "/Users/apple/Desktop/markdown/en/multiplatform-onboard/multiplatform-dependencies.md"
 //                val filePath = "C:\\Users\\cygao\\Desktop\\test.txt"
-                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\faq.md"
+//                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\faq.md"
+                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\development\\multiplatform-ktor-sqldelight.md"
 //                val filePath = "C:\\Users\\cygao\\Desktop\\supported-platforms-zh-cn.md"
 //                val filePath = "C:\\Users\\cygao\\Desktop\\markdown\\en\\multiplatform-setup.md"
 //                val filePath = "C:\\Users\\cygao\\Desktop\\kotlin-multiplatform-roadmap.md"

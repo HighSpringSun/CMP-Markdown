@@ -16,7 +16,7 @@ plugins {
 
 
 group = "com.kmpstudy" // 替换为你的 Group ID
-version = "0.5.4" // 版本号
+version = "0.5.5" // 版本号
 val artifactId = "cmp-markdown"
 
 
@@ -159,9 +159,9 @@ android {
     }
 }
 
-dependencies {
-    debugImplementation(compose.uiTooling)
-}
+//dependencies {
+//    debugImplementation(compose.uiTooling)
+//}
 
 compose.desktop {
     application {
