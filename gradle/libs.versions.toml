@@ -5,14 +5,24 @@ android-minSdk = "24"
 android-targetSdk = "34"
 androidx-activityCompose = "1.10.1"
 androidx-lifecycle = "2.8.4"
+coilComposeVersion = "3.1.0"
+coilNetworkKtor3 = "3.1.0"
+coilSvg = "3.1.0"
 compose-multiplatform = "1.7.3"
+jsoupJsoup = "1.19.1"
 junit = "4.13.2"
 kotlin = "2.1.20"
 kotlinx-coroutines = "1.10.1"
 jetbrainsKotlinJvm = "1.9.24"
+ktorClientJavaVersion = "3.1.0"
+markdownVersion = "0.7.3"
 mavenPublishing = "0.30.0"
 
 [libraries]
+coil3-coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilComposeVersion" }
+coil3-coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coilSvg" }
+coil3-coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilNetworkKtor3" }
+jetbrains-markdown = { module = "org.jetbrains:markdown", version.ref = "markdownVersion" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -20,6 +30,8 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+ktor-ktor-client-java = { module = "io.ktor:ktor-client-java", version.ref = "ktorClientJavaVersion" }
+org-jsoup-jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoupJsoup" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
