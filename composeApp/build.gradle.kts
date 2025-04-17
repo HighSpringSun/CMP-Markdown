@@ -1,6 +1,5 @@
 import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
@@ -79,7 +78,8 @@ kotlin {
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        moduleName = "composeApp"
+        this.outputModuleName.set("composeApp")
+//        moduleName = "composeApp"
         browser {
             val rootDirPath = project.rootDir.path
             val projectDirPath = project.projectDir.path
@@ -104,31 +104,28 @@ kotlin {
 //            implementation(compose.preview)
 //            implementation(libs.androidx.activity.compose)
 
-            implementation("org.jsoup:jsoup:1.19.1")
+            implementation(libs.org.jsoup.jsoup)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
             implementation(compose.ui)
-//            implementation(compose.components.resources)
-//            implementation(compose.components.uiToolingPreview)
-//            implementation(libs.androidx.lifecycle.viewmodel)
-//            implementation(libs.androidx.lifecycle.runtime.compose)
+
             // markdown
-            implementation("org.jetbrains:markdown:0.7.3")
+            implementation(libs.jetbrains.markdown)
             // coil3
-            implementation("io.coil-kt.coil3:coil-compose:3.1.0")
-            implementation("io.coil-kt.coil3:coil-network-ktor3:3.1.0")
-            implementation("io.coil-kt.coil3:coil-svg:3.1.0")
+            implementation(libs.coil3.coil.compose)
+            implementation(libs.coil3.coil.network.ktor3)
+            implementation(libs.coil3.coil.svg)
 
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
 //            implementation(libs.kotlinx.coroutines.swing)
-            implementation("io.ktor:ktor-client-java:3.1.0")
+            implementation(libs.ktor.ktor.client.java)
 
-            implementation("org.jsoup:jsoup:1.19.1")
+            implementation(libs.org.jsoup.jsoup)
         }
     }
 
