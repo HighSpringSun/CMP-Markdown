@@ -43,6 +43,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.SubcomposeAsyncImage
+import com.fleeksoft.ksoup.Ksoup
 import com.kmpstudy.markdown.constant.MarkdownElementTypeNames
 import com.kmpstudy.markdown.exception.MarkdownParseTableException
 import com.kmpstudy.markdown.localstate.LocalImageState
@@ -151,7 +152,7 @@ class MarkdownParser(private val markdownContent: String) {
             modifier = Modifier
         ) {
             val html = node.getTextInNode(markdownContent).toString()
-            val htmlNode = HtmlBlockParser().parseHtml(html)
+            val htmlNode = HtmlBlockParser1().parseHtml(html)
             // 打印调试信息
 //            println("HTML Struct:\n${debugHtmlNode(htmlNode)}")
             HtmlBlockRenderer(htmlNode)

@@ -14,6 +14,7 @@ junit = "4.13.2"
 kotlin = "2.1.20"
 kotlinx-coroutines = "1.10.1"
 jetbrainsKotlinJvm = "1.9.24"
+ksoup = "0.2.2"
 ktorClientJavaVersion = "3.1.0"
 markdownVersion = "0.7.3"
 mavenPublishing = "0.30.0"
@@ -30,6 +31,7 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
 ktor-ktor-client-java = { module = "io.ktor:ktor-client-java", version.ref = "ktorClientJavaVersion" }
 org-jsoup-jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoupJsoup" }
 

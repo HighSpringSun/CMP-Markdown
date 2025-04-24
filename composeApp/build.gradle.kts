@@ -118,7 +118,7 @@ kotlin {
             implementation(libs.coil3.coil.compose)
             implementation(libs.coil3.coil.network.ktor3)
             implementation(libs.coil3.coil.svg)
-
+            implementation(libs.ksoup)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
