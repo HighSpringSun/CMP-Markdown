@@ -43,14 +43,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.SubcomposeAsyncImage
-import com.fleeksoft.ksoup.Ksoup
 import com.kmpstudy.markdown.constant.MarkdownElementTypeNames
 import com.kmpstudy.markdown.exception.MarkdownParseTableException
 import com.kmpstudy.markdown.localstate.LocalImageState
 import com.kmpstudy.markdown.localstate.LocalInlineContent
 import com.kmpstudy.markdown.renderer.HtmlBlockRenderer
 import com.kmpstudy.markdown.renderer.Table
-import com.kmpstudy.markdown.renderer.debugHtmlNode
 import com.kmpstudy.markdown.util.findChildByName
 import com.kmpstudy.markdown.util.getTableItemNumber
 import com.kmpstudy.markdown.util.hasImage
@@ -152,9 +150,7 @@ class MarkdownParser(private val markdownContent: String) {
             modifier = Modifier
         ) {
             val html = node.getTextInNode(markdownContent).toString()
-            val htmlNode = HtmlBlockParser1().parseHtml(html)
-            // 打印调试信息
-//            println("HTML Struct:\n${debugHtmlNode(htmlNode)}")
+            val htmlNode = HtmlBlockParser().parseHtml(html)
             HtmlBlockRenderer(htmlNode)
         }
     }
@@ -277,10 +273,10 @@ class MarkdownParser(private val markdownContent: String) {
         }
     }
 
-    @Composable
-    private fun Else(node: ASTNode) {
-        Text(node.type.toString())
-    }
+//    @Composable
+//    private fun Else(node: ASTNode) {
+//        Text(node.type.toString())
+//    }
 
     private fun parseTable(node: ASTNode): MarkdownTableState {
         val tableList = splitList(node.children) { it.type.name == MarkdownElementTypeNames.EOL }

@@ -18,13 +18,13 @@ sealed class HtmlNode {
 }
 
 
-expect class HtmlBlockParser() {
+expect class HtmlBlockParser_Deprecated() {
 
     fun parseHtml(html: String): HtmlNode
 }
 
 
-class HtmlBlockParser1 {
+class HtmlBlockParser {
     fun parseHtml(html: String): HtmlNode {
         val document = Ksoup.parse(html)
         return if (document.childNodes().isNotEmpty()) {

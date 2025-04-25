@@ -5,7 +5,8 @@ import org.w3c.dom.Node
 import org.w3c.dom.asList
 import org.w3c.dom.parsing.DOMParser
 
-actual class HtmlBlockParser {
+@Deprecated("Replace With Ksoup")
+actual class HtmlBlockParser_Deprecated {
     actual fun parseHtml(html: String): HtmlNode {
         val parser = DOMParser()
         val document = parser.parseFromString(html, "text/html".toJsString())

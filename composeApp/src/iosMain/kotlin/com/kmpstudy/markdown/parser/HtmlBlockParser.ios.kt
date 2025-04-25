@@ -2,7 +2,8 @@ package com.kmpstudy.markdown.parser
 
 //import platform.WebKit.WKWebView
 
-actual class HtmlBlockParser {
+@Deprecated("Replace with ksoup")
+actual class HtmlBlockParser_Deprecated {
 //    private val webView by lazy { WKWebView() }
 
     actual fun parseHtml(html: String): HtmlNode {

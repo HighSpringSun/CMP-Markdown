@@ -1,6 +1,7 @@
 package com.kmpstudy.markdown.parser
 
-actual class HtmlBlockParser {
+@Deprecated("Replace with ksoup")
+actual class HtmlBlockParser_Deprecated {
     actual fun parseHtml(html: String): HtmlNode {
         val fragment = org.jsoup.Jsoup.parseBodyFragment(html)
         return if (fragment.body().children().isNotEmpty()) {
